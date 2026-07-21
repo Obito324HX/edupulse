@@ -53,7 +53,7 @@ export default function Attendance() {
 
   return (
     <div className='flex flex-col gap-6'>
-      <div className='flex items-center justify-between'>
+      <div className='flex items-center justify-between flex-wrap gap-3'>
         <div>
           <h1 className='text-2xl font-bold' style={{ color: 'var(--text)' }}>Attendance</h1>
           <p className='text-sm mt-1' style={{ color: 'var(--text-muted)' }}>
@@ -79,6 +79,7 @@ export default function Attendance() {
       )}
 
       <div className='rounded-2xl overflow-hidden' style={{ border: '1px solid var(--border)' }}>
+        <div className='overflow-x-auto'>
         <table className='w-full'>
           <thead>
             <tr style={{ background: 'var(--dark-secondary)' }}>
@@ -108,6 +109,7 @@ export default function Attendance() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Mark Attendance Modal */}
