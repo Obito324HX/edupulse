@@ -78,7 +78,7 @@ export default function Students() {
               <tr key={student.id} style={{ borderTop: '1px solid var(--border)', background: i % 2 === 0 ? 'var(--dark)' : 'var(--dark-secondary)' }}>
                 <td className='px-6 py-4'>
                   <div className='flex items-center gap-3'>
-                    <div className='w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold text-white'
+                    <div className='w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold text-on-primary'
                       style={{ background: 'var(--primary)' }}>
                       {student.first_name[0]}{student.last_name[0]}
                     </div>
@@ -102,7 +102,7 @@ export default function Students() {
                 </td>
                 <td className='px-6 py-4'>
                   <button onClick={() => { setSelectedStudent(student); setShowEnrollModal(true) }}
-                    className='flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white'
+                    className='flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-on-primary'
                     style={{ background: 'var(--primary)' }}>
                     <UserPlus size={14} /> Enroll
                   </button>
@@ -116,7 +116,7 @@ export default function Students() {
       {/* Enroll Modal */}
       {showEnrollModal && (
         <div className='fixed inset-0 flex items-center justify-center z-50 p-4'
-          style={{ background: 'rgba(0,0,0,0.7)' }}>
+          style={{ background: 'var(--overlay)' }}>
           <div className='w-full max-w-md rounded-2xl p-8'
             style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
             <div className='flex items-center justify-between mb-6'>
@@ -136,7 +136,7 @@ export default function Students() {
               </div>
               <button onClick={() => enroll.mutate({ courseId: selectedCourse, studentId: selectedStudent.id })}
                 disabled={enroll.isPending || !selectedCourse}
-                className='w-full py-3 rounded-xl font-semibold text-sm text-white mt-2'
+                className='w-full py-3 rounded-xl font-semibold text-sm text-on-primary mt-2'
                 style={{ background: !selectedCourse || enroll.isPending ? 'var(--border)' : 'var(--primary)' }}>
                 {enroll.isPending ? 'Enrolling...' : 'Enroll Student'}
               </button>

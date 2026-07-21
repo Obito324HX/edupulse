@@ -105,7 +105,7 @@ export default function Dashboard() {
           <div className='flex flex-col gap-3'>
             {notifications?.slice(0, 5).map(n => (
               <div key={n.id} className='flex items-start gap-3 p-3 rounded-xl'
-                style={{ background: n.read ? 'transparent' : 'var(--primary)10', border: '1px solid var(--border)' }}>
+                style={{ background: n.read ? 'transparent' : 'color-mix(in srgb, var(--primary) 10%, transparent)', border: '1px solid var(--border)' }}>
                 <div className='w-2 h-2 rounded-full mt-1.5 flex-shrink-0'
                   style={{ background: n.read ? 'var(--border)' : 'var(--primary)' }} />
                 <div>

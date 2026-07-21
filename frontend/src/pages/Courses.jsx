@@ -63,7 +63,7 @@ export default function Courses() {
               <Plus size={18} /> Department
             </button>
             <button onClick={() => setShowCourseModal(true)}
-              className='flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white'
+              className='flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-on-primary'
               style={{ background: 'var(--primary)' }}>
               <Plus size={18} /> Course
             </button>
@@ -80,7 +80,7 @@ export default function Courses() {
           <div key={course.id} className='rounded-2xl p-6'
             style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
             <div className='w-10 h-10 rounded-xl flex items-center justify-center mb-4'
-              style={{ background: 'var(--primary)20' }}>
+              style={{ background: 'color-mix(in srgb, var(--primary) 15%, transparent)' }}>
               <BookOpen size={20} style={{ color: 'var(--primary)' }} />
             </div>
             <h3 className='font-semibold' style={{ color: 'var(--text)' }}>{course.name}</h3>
@@ -88,13 +88,13 @@ export default function Courses() {
             <div className='flex gap-2 mt-4'>
               {course.semester && (
                 <span className='px-2 py-1 rounded-lg text-xs'
-                  style={{ background: 'var(--primary)20', color: 'var(--primary)' }}>
+                  style={{ background: 'color-mix(in srgb, var(--primary) 15%, transparent)', color: 'var(--primary)' }}>
                   {course.semester}
                 </span>
               )}
               {course.year && (
                 <span className='px-2 py-1 rounded-lg text-xs'
-                  style={{ background: 'var(--secondary)20', color: 'var(--secondary)' }}>
+                  style={{ background: 'color-mix(in srgb, var(--secondary) 15%, transparent)', color: 'var(--secondary)' }}>
                   {course.year}
                 </span>
               )}
@@ -106,7 +106,7 @@ export default function Courses() {
       {/* Department Modal */}
       {showDeptModal && (
         <div className='fixed inset-0 flex items-center justify-center z-50 p-4'
-          style={{ background: 'rgba(0,0,0,0.7)' }}>
+          style={{ background: 'var(--overlay)' }}>
           <div className='w-full max-w-md rounded-2xl p-8'
             style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
             <div className='flex items-center justify-between mb-6'>
@@ -123,7 +123,7 @@ export default function Courses() {
               </div>
               <button onClick={() => createDept.mutate(deptForm)}
                 disabled={createDept.isPending}
-                className='w-full py-3 rounded-xl font-semibold text-sm text-white'
+                className='w-full py-3 rounded-xl font-semibold text-sm text-on-primary'
                 style={{ background: createDept.isPending ? 'var(--border)' : 'var(--primary)' }}>
                 {createDept.isPending ? 'Creating...' : 'Create Department'}
               </button>
@@ -135,7 +135,7 @@ export default function Courses() {
       {/* Course Modal */}
       {showCourseModal && (
         <div className='fixed inset-0 flex items-center justify-center z-50 p-4'
-          style={{ background: 'rgba(0,0,0,0.7)' }}>
+          style={{ background: 'var(--overlay)' }}>
           <div className='w-full max-w-md rounded-2xl p-8'
             style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
             <div className='flex items-center justify-between mb-6'>
@@ -171,7 +171,7 @@ export default function Courses() {
               </div>
               <button onClick={() => createCourse.mutate(courseForm)}
                 disabled={createCourse.isPending}
-                className='w-full py-3 rounded-xl font-semibold text-sm text-white'
+                className='w-full py-3 rounded-xl font-semibold text-sm text-on-primary'
                 style={{ background: createCourse.isPending ? 'var(--border)' : 'var(--primary)' }}>
                 {createCourse.isPending ? 'Creating...' : 'Create Course'}
               </button>
