@@ -12,7 +12,7 @@ export default function Profile() {
       </div>
       <div className='rounded-2xl p-8' style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
         <div className='flex items-center gap-6 mb-8'>
-          <div className='w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-bold text-white'
+          <div className='w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-bold text-on-primary'
             style={{ background: 'var(--primary)' }}>
             {user?.first_name?.[0]}{user?.last_name?.[0]}
           </div>
@@ -21,7 +21,7 @@ export default function Profile() {
               {user?.first_name} {user?.last_name}
             </h2>
             <span className='px-3 py-1 rounded-full text-xs font-medium capitalize mt-1 inline-block'
-              style={{ background: 'var(--primary)20', color: 'var(--primary)' }}>
+              style={{ background: 'color-mix(in srgb, var(--primary) 16%, transparent)', color: 'var(--primary)' }}>
               {user?.role?.replace('_', ' ')}
             </span>
           </div>
@@ -36,7 +36,7 @@ export default function Profile() {
             <div key={label} className='flex items-center gap-4 p-4 rounded-xl'
               style={{ background: 'var(--dark)', border: '1px solid var(--border)' }}>
               <div className='w-10 h-10 rounded-xl flex items-center justify-center'
-                style={{ background: 'var(--primary)20' }}>
+                style={{ background: 'color-mix(in srgb, var(--primary) 16%, transparent)' }}>
                 <Icon size={18} style={{ color: 'var(--primary)' }} />
               </div>
               <div>

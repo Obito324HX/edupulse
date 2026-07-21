@@ -26,9 +26,9 @@ export default function Institutions() {
   })
 
   const getStatusStyle = (status) => {
-    if (status === 'active') return { background: '#22c55e20', color: '#22c55e' }
-    if (status === 'trial') return { background: '#f59e0b20', color: '#f59e0b' }
-    return { background: '#ef444420', color: '#ef4444' }
+    if (status === 'active') return { background: 'color-mix(in srgb, var(--success) 16%, transparent)', color: 'var(--success)' }
+    if (status === 'trial') return { background: 'color-mix(in srgb, var(--warning) 16%, transparent)', color: 'var(--warning)' }
+    return { background: 'color-mix(in srgb, var(--danger) 16%, transparent)', color: 'var(--danger)' }
   }
 
   const inputStyle = { background: 'var(--dark)', border: '1px solid var(--border)', color: 'var(--text)' }
@@ -41,7 +41,7 @@ export default function Institutions() {
           <p className='text-sm mt-1' style={{ color: 'var(--text-muted)' }}>All institutions on EduPulse</p>
         </div>
         <button onClick={() => setShowModal(true)}
-          className='flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white'
+          className='flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-on-primary'
           style={{ background: 'var(--primary)' }}>
           <Plus size={18} /> Add Institution
         </button>
@@ -56,7 +56,7 @@ export default function Institutions() {
           <div key={inst.id} className='rounded-2xl p-6'
             style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
             <div className='w-12 h-12 rounded-xl flex items-center justify-center mb-4'
-              style={{ background: 'var(--primary)20' }}>
+              style={{ background: 'color-mix(in srgb, var(--primary) 16%, transparent)' }}>
               <Building2 size={24} style={{ color: 'var(--primary)' }} />
             </div>
             <h3 className='font-semibold' style={{ color: 'var(--text)' }}>{inst.name}</h3>
@@ -75,7 +75,7 @@ export default function Institutions() {
       {/* Modal */}
       {showModal && (
         <div className='fixed inset-0 flex items-center justify-center z-50 p-4'
-          style={{ background: 'rgba(0,0,0,0.7)' }}>
+          style={{ background: 'var(--overlay)' }}>
           <div className='w-full max-w-md rounded-2xl p-8'
             style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
             <div className='flex items-center justify-between mb-6'>
@@ -101,7 +101,7 @@ export default function Institutions() {
               ))}
               <button onClick={() => create.mutate(form)}
                 disabled={create.isPending}
-                className='w-full py-3 rounded-xl font-semibold text-sm text-white mt-2'
+                className='w-full py-3 rounded-xl font-semibold text-sm text-on-primary mt-2'
                 style={{ background: create.isPending ? 'var(--border)' : 'var(--primary)' }}>
                 {create.isPending ? 'Creating...' : 'Create Institution'}
               </button>

@@ -22,9 +22,9 @@ export default function Alerts() {
   })
 
   const getSeverityStyle = (severity) => {
-    if (severity === 'high') return { background: '#ef444420', color: '#ef4444', border: '1px solid #ef444440' }
-    if (severity === 'medium') return { background: '#f59e0b20', color: '#f59e0b', border: '1px solid #f59e0b40' }
-    return { background: '#6366f120', color: '#6366f1', border: '1px solid #6366f140' }
+    if (severity === 'high') return { background: 'color-mix(in srgb, var(--danger) 16%, transparent)', color: 'var(--danger)', border: '1px solid color-mix(in srgb, var(--danger) 30%, transparent)' }
+    if (severity === 'medium') return { background: 'color-mix(in srgb, var(--warning) 16%, transparent)', color: 'var(--warning)', border: '1px solid color-mix(in srgb, var(--warning) 30%, transparent)' }
+    return { background: 'color-mix(in srgb, var(--secondary) 16%, transparent)', color: 'var(--secondary)', border: '1px solid color-mix(in srgb, var(--secondary) 30%, transparent)' }
   }
 
   return (
@@ -55,14 +55,14 @@ export default function Alerts() {
             </div>
             {!alert.resolved && ['lecturer', 'institution_admin', 'super_admin'].includes(user?.role) && (
               <button onClick={() => resolve.mutate(alert.id)}
-                className='px-4 py-2 rounded-xl text-xs font-medium text-white flex-shrink-0'
+                className='px-4 py-2 rounded-xl text-xs font-medium text-on-primary flex-shrink-0'
                 style={{ background: 'var(--success)' }}>
                 Resolve
               </button>
             )}
             {alert.resolved && (
               <span className='px-3 py-1 rounded-full text-xs font-medium'
-                style={{ background: '#22c55e20', color: '#22c55e' }}>
+                style={{ background: 'color-mix(in srgb, var(--success) 16%, transparent)', color: 'var(--success)' }}>
                 Resolved
               </span>
             )}

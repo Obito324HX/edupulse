@@ -1,67 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
 @import "tailwindcss";
 
 * {
-
-margin: 0;
-
-padding: 0;
-
-box-sizing: border-box;
-
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-:root {
+/* Dark theme (default) — terminal/amber, matching the portfolio's original dark aesthetic */
+:root,
+:root[data-theme="dark"] {
+  --bg: #0A0A0A;
+  --surface: #121212;
+  --surface-alt: #1A1A1A;
+  --text: #EDEBE4;
+  --text-muted: #8A8A82;
+  --border: #2A2A28;
 
---primary: #6366f1;
+  --primary: #FFB000;
+  --primary-dark: #D99000;
+  --secondary: #34D399;
+  --success: #34D399;
+  --warning: #FFB000;
+  --danger: #E5484D;
+  --overlay: rgba(0, 0, 0, 0.75);
+  --on-primary: #0A0A0A;
 
---primary-dark: #4f46e5;
+  /* legacy aliases kept so nothing that references these breaks */
+  --dark: var(--bg);
+  --dark-secondary: var(--surface);
+}
 
---secondary: #06b6d4;
+/* Light theme */
+:root[data-theme="light"] {
+  --bg: #F4F6F3;
+  --surface: #FFFFFF;
+  --surface-alt: #EBF0EC;
+  --text: #10201B;
+  --text-muted: #5B6B65;
+  --border: #DCE4DE;
 
---success: #22c55e;
+  --primary: #E4572E;
+  --primary-dark: #C8431E;
+  --secondary: #0F8B8D;
+  --success: #1B8A5A;
+  --warning: #C4780F;
+  --danger: #C43154;
+  --overlay: rgba(16, 32, 27, 0.5);
+  --on-primary: #FFFFFF;
 
---warning: #f59e0b;
+  --dark: var(--bg);
+  --dark-secondary: var(--surface);
+}
 
---danger: #ef4444;
-
---dark: #0f172a;
-
---dark-secondary: #1e293b;
-
---text: #f1f5f9;
-
---text-muted: #94a3b8;
-
---border: #334155;
-
+html {
+  color-scheme: light dark;
 }
 
 body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
 
-background-color: var(--dark);
+h1, h2, h3, h4, .font-display {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  letter-spacing: -0.01em;
+}
 
-color: var(--text);
+.font-mono-data {
+  font-family: 'JetBrains Mono', monospace;
+}
 
-font-family: 'Inter', sans-serif;
-
+.text-on-primary {
+  color: var(--on-primary);
 }
 
 ::-webkit-scrollbar {
-
-width: 6px;
-
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-
-background: var(--dark-secondary);
-
+  background: var(--surface-alt);
 }
 
 ::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
 
-background: var(--border);
+/* Pulse signature: an ECG-style trace used on the logo mark and as an
+   ambient loading/divider motif. Respects reduced-motion preference. */
+@keyframes pulse-trace {
+  0% { stroke-dashoffset: 240; }
+  60% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 0; }
+}
 
-border-radius: 3px;
+.pulse-line {
+  stroke-dasharray: 240;
+  stroke-dashoffset: 240;
+  animation: pulse-trace 1.8s ease-out forwards;
+}
 
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+.pulse-dot {
+  animation: pulse-glow 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-line, .pulse-dot {
+    animation: none;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
 }

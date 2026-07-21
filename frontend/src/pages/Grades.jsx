@@ -45,9 +45,9 @@ export default function Grades() {
   })
 
   const getColor = (pct) => {
-    if (pct >= 70) return '#22c55e'
-    if (pct >= 50) return '#f59e0b'
-    return '#ef4444'
+    if (pct >= 70) return 'var(--success)'
+    if (pct >= 50) return 'var(--warning)'
+    return 'var(--danger)'
   }
 
   const inputStyle = { background: 'var(--dark)', border: '1px solid var(--border)', color: 'var(--text)' }
@@ -63,7 +63,7 @@ export default function Grades() {
         </div>
         {canEnter && (
           <button onClick={() => setShowModal(true)}
-            className='flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white'
+            className='flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-on-primary'
             style={{ background: 'var(--primary)' }}>
             <Plus size={18} /> Add Grade
           </button>
@@ -103,7 +103,7 @@ export default function Grades() {
                 <td className='px-6 py-4 text-sm font-medium' style={{ color: 'var(--text)' }}>{grade.assignment_name}</td>
                 <td className='px-6 py-4'>
                   <span className='px-2 py-1 rounded-lg text-xs capitalize'
-                    style={{ background: 'var(--primary)20', color: 'var(--primary)' }}>
+                    style={{ background: 'color-mix(in srgb, var(--primary) 16%, transparent)', color: 'var(--primary)' }}>
                     {grade.type}
                   </span>
                 </td>
@@ -125,7 +125,7 @@ export default function Grades() {
       {/* Add Grade Modal */}
       {showModal && (
         <div className='fixed inset-0 flex items-center justify-center z-50 p-4'
-          style={{ background: 'rgba(0,0,0,0.7)' }}>
+          style={{ background: 'var(--overlay)' }}>
           <div className='w-full max-w-md rounded-2xl p-8'
             style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
             <div className='flex items-center justify-between mb-6'>
@@ -186,7 +186,7 @@ export default function Grades() {
               </div>
               <button onClick={() => addGrade.mutate(form)}
                 disabled={addGrade.isPending}
-                className='w-full py-3 rounded-xl font-semibold text-sm text-white mt-2'
+                className='w-full py-3 rounded-xl font-semibold text-sm text-on-primary mt-2'
                 style={{ background: addGrade.isPending ? 'var(--border)' : 'var(--primary)' }}>
                 {addGrade.isPending ? 'Saving...' : 'Save Grade'}
               </button>

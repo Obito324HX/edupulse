@@ -5,6 +5,20 @@
     <link rel="icon" type="image/svg+xml" href="/edupulse-icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EduPulse</title>
+    <script>
+      (function () {
+        try {
+          var stored = JSON.parse(localStorage.getItem('edupulse-theme'));
+          var theme = stored && stored.state && stored.state.theme;
+          if (!theme) {
+            theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          }
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

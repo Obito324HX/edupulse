@@ -5,6 +5,8 @@ import {
   ClipboardList, Bell, User, LogOut, Building2, Menu, X
 } from 'lucide-react'
 import { useState } from 'react'
+import PulseMark from './PulseMark'
+import ThemeToggle from './ThemeToggle'
 
 export default function Layout() {
   const { user, logout } = useAuthStore()
@@ -41,16 +43,13 @@ export default function Layout() {
         <div className='flex items-center justify-between p-4' style={{ borderBottom: '1px solid var(--border)' }}>
           {sidebarOpen && (
             <div className='flex items-center gap-2'>
-              <div className='w-8 h-8 rounded-lg flex items-center justify-center'
-                style={{ background: 'var(--primary)' }}>
-                <span className='text-white font-bold text-sm'>EP</span>
-              </div>
-              <span className='font-bold text-lg' style={{ color: 'var(--text)' }}>EduPulse</span>
+              <PulseMark size={32} />
+              <span className='font-display font-bold text-lg' style={{ color: 'var(--text)' }}>EduPulse</span>
             </div>
           )}
           <button onClick={() => setSidebarOpen(!sidebarOpen)}
             style={{ color: 'var(--text-muted)' }}
-            className='hover:text-white transition-colors'>
+            className='hover:text-[var(--text)] transition-colors'>
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
@@ -60,11 +59,12 @@ export default function Layout() {
           {filteredNav.map(({ to, icon: Icon, label }) => (
             <NavLink key={to} to={to}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${isActive ? 'text-white' : 'hover:text-white'}`
+                `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 border-l-2 ${isActive ? '' : 'hover:text-[var(--text)]'}`
               }
               style={({ isActive }) => ({
-                background: isActive ? 'var(--primary)' : 'transparent',
-                color: isActive ? 'white' : 'var(--text-muted)'
+                background: isActive ? 'var(--surface-alt)' : 'transparent',
+                borderLeftColor: isActive ? 'var(--primary)' : 'transparent',
+                color: isActive ? 'var(--primary)' : 'var(--text-muted)'
               })}>
               <Icon size={20} />
               {sidebarOpen && <span className='text-sm font-medium'>{label}</span>}
@@ -84,8 +84,9 @@ export default function Layout() {
               </p>
             </div>
           )}
+          <ThemeToggle collapsed={!sidebarOpen} />
           <button onClick={handleLogout}
-            className='flex items-center gap-3 px-3 py-2.5 rounded-lg w-full transition-all duration-200 hover:text-white'
+            className='flex items-center gap-3 px-3 py-2.5 rounded-lg w-full transition-all duration-200 hover:text-[var(--text)]'
             style={{ color: 'var(--text-muted)' }}>
             <LogOut size={20} />
             {sidebarOpen && <span className='text-sm font-medium'>Logout</span>}

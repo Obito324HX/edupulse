@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
+import PulseMark from '../components/PulseMark'
+import ThemeToggle from '../components/ThemeToggle'
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -35,15 +37,17 @@ export default function Register() {
   }
 
   return (
-    <div className='min-h-screen flex items-center justify-center p-4'
+    <div className='min-h-screen flex items-center justify-center p-4 relative'
       style={{ background: 'var(--dark)' }}>
+      <div className='absolute top-4 right-4'>
+        <ThemeToggle variant='icon' />
+      </div>
       <div className='w-full max-w-md'>
         <div className='text-center mb-8'>
-          <div className='w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4'
-            style={{ background: 'var(--primary)' }}>
-            <span className='text-white font-bold text-2xl'>EP</span>
+          <div className='mx-auto mb-4 w-fit'>
+            <PulseMark size={64} />
           </div>
-          <h1 className='text-3xl font-bold' style={{ color: 'var(--text)' }}>EduPulse</h1>
+          <h1 className='font-display text-3xl font-bold' style={{ color: 'var(--text)' }}>EduPulse</h1>
           <p className='mt-1' style={{ color: 'var(--text-muted)' }}>Create your account</p>
         </div>
         <div className='rounded-2xl p-8' style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
@@ -104,7 +108,7 @@ export default function Register() {
                 style={inputStyle} />
             </div>
             <button type='submit' disabled={loading}
-              className='w-full py-3 rounded-xl font-semibold text-sm text-white transition-all mt-2'
+              className='w-full py-3 rounded-xl font-semibold text-sm text-on-primary transition-all mt-2'
               style={{ background: loading ? 'var(--border)' : 'var(--primary)' }}>
               {loading ? 'Creating account...' : 'Create account'}
             </button>
