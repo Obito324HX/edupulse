@@ -91,7 +91,12 @@ export default function Students() {
                 <td className='px-6 py-4 text-sm' style={{ color: 'var(--text-muted)' }}>{student.phone || '—'}</td>
                 <td className='px-6 py-4'>
                   <span className='px-3 py-1 rounded-full text-xs font-medium'
-                    style={{ background: student.is_active ? '#22c55e20' : '#ef444420', color: student.is_active ? '#22c55e' : '#ef4444' }}>
+                    style={{
+                      background: student.is_active
+                        ? 'color-mix(in srgb, var(--success) 15%, transparent)'
+                        : 'color-mix(in srgb, var(--danger) 15%, transparent)',
+                      color: student.is_active ? 'var(--success)' : 'var(--danger)'
+                    }}>
                     {student.is_active ? 'Active' : 'Inactive'}
                   </span>
                 </td>

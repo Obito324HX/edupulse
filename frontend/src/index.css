@@ -1,67 +1,107 @@
 @import "tailwindcss";
 
 * {
-
-margin: 0;
-
-padding: 0;
-
-box-sizing: border-box;
-
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-:root {
+/* ---------------------------------------------------------------
+   EduPulse theme tokens.
+   Names like --dark / --dark-secondary are legacy from the original
+   indigo-on-navy palette and are kept as-is so existing pages don't
+   need to be touched — only the values are repointed per theme.
+   ----------------------------------------------------------------*/
 
---primary: #6366f1;
+:root,
+[data-theme="dark"] {
+  /* pulse accent (coral-orange) */
+  --primary: #ef7a53;
+  --primary-dark: #d9612f;
+  --primary-rgb: 239, 122, 83;
 
---primary-dark: #4f46e5;
+  --secondary: #3fa38c;
+  --success: #4caf7d;
+  --warning: #e0a838;
+  --danger: #e5695f;
 
---secondary: #06b6d4;
+  /* surfaces */
+  --dark: #0c130f;
+  --dark-secondary: #141d17;
+  --surface-raised: #182219;
 
---success: #22c55e;
+  /* text */
+  --text: #ecece4;
+  --text-muted: #8fa093;
+  --border: #253028;
+}
 
---warning: #f59e0b;
+[data-theme="light"] {
+  /* pulse accent (coral-orange, slightly deeper for contrast on paper) */
+  --primary: #e2653d;
+  --primary-dark: #c1512e;
+  --primary-rgb: 226, 101, 61;
 
---danger: #ef4444;
+  --secondary: #2f7a6b;
+  --success: #2f9455;
+  --warning: #b9791c;
+  --danger: #c9483f;
 
---dark: #0f172a;
+  /* surfaces */
+  --dark: #faf6ee;
+  --dark-secondary: #ffffff;
+  --surface-raised: #fffdf9;
 
---dark-secondary: #1e293b;
-
---text: #f1f5f9;
-
---text-muted: #94a3b8;
-
---border: #334155;
-
+  /* text */
+  --text: #1c2a20;
+  --text-muted: #63705f;
+  --border: #e6dfcd;
 }
 
 body {
+  background-color: var(--dark);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
 
-background-color: var(--dark);
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+}
 
-color: var(--text);
-
-font-family: 'Inter', sans-serif;
-
+.font-mono-data {
+  font-family: 'JetBrains Mono', monospace;
 }
 
 ::-webkit-scrollbar {
-
-width: 6px;
-
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-
-background: var(--dark-secondary);
-
+  background: var(--dark-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
 
-background: var(--border);
+/* subtle animated pulse divider, used as a section accent */
+@keyframes pulse-sweep {
+  0% { background-position: 0% 0; }
+  100% { background-position: 200% 0; }
+}
 
-border-radius: 3px;
-
+.pulse-divider {
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--border) 0%,
+    var(--primary) 45%,
+    var(--border) 55%,
+    var(--border) 100%
+  );
+  background-size: 200% 100%;
+  animation: pulse-sweep 3.5s linear infinite;
 }
