@@ -49,7 +49,7 @@ export default function Layout() {
           )}
           <button onClick={() => setSidebarOpen(!sidebarOpen)}
             style={{ color: 'var(--text-muted)' }}
-            className='hover:text-white transition-colors'>
+            className='hover:text-[var(--text)] transition-colors'>
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
@@ -59,7 +59,7 @@ export default function Layout() {
           {filteredNav.map(({ to, icon: Icon, label }) => (
             <NavLink key={to} to={to}
               className={({ isActive }) =>
-                `relative flex items-center gap-3 pl-3 pr-3 py-2.5 rounded-lg transition-all duration-200 ${isActive ? '' : 'hover:text-white'}`
+                `relative flex items-center gap-3 pl-3 pr-3 py-2.5 rounded-lg transition-all duration-200 ${isActive ? '' : 'hover:text-[var(--text)]'}`
               }
               style={({ isActive }) => ({
                 background: isActive ? `rgba(var(--primary-rgb), 0.12)` : 'transparent',
@@ -93,7 +93,7 @@ export default function Layout() {
           )}
           <ThemeToggle collapsed={!sidebarOpen} />
           <button onClick={handleLogout}
-            className='flex items-center gap-3 px-3 py-2.5 rounded-lg w-full transition-all duration-200 hover:text-white'
+            className='flex items-center gap-3 px-3 py-2.5 rounded-lg w-full transition-all duration-200 hover:text-[var(--text)]'
             style={{ color: 'var(--text-muted)' }}>
             <LogOut size={20} />
             {sidebarOpen && <span className='text-sm font-medium'>Logout</span>}

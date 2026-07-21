@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
+import PulseLogo from '../components/PulseLogo'
+import ThemeToggle from '../components/ThemeToggle'
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' })
@@ -26,13 +28,15 @@ export default function Login() {
   }
 
   return (
-    <div className='min-h-screen flex items-center justify-center p-4'
+    <div className='min-h-screen flex items-center justify-center p-4 relative'
       style={{ background: 'var(--dark)' }}>
+      <div className='absolute top-4 right-4'>
+        <ThemeToggle variant='icon' />
+      </div>
       <div className='w-full max-w-md'>
         <div className='text-center mb-8'>
-          <div className='w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4'
-            style={{ background: 'var(--primary)' }}>
-            <span className='text-white font-bold text-2xl'>EP</span>
+          <div className='mx-auto mb-4 w-fit'>
+            <PulseLogo size={64} />
           </div>
           <h1 className='text-3xl font-bold' style={{ color: 'var(--text)' }}>EduPulse</h1>
           <p className='mt-1' style={{ color: 'var(--text-muted)' }}>
@@ -59,7 +63,7 @@ export default function Login() {
                 style={{ background: 'var(--dark)', border: '1px solid var(--border)', color: 'var(--text)' }} />
             </div>
             <button type='submit' disabled={loading}
-              className='w-full py-3 rounded-xl font-semibold text-sm text-white transition-all mt-2'
+              className='w-full py-3 rounded-xl font-semibold text-sm text-on-primary transition-all mt-2'
               style={{ background: loading ? 'var(--border)' : 'var(--primary)' }}>
               {loading ? 'Signing in...' : 'Sign in'}
             </button>

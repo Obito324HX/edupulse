@@ -15,25 +15,28 @@
 
 :root,
 [data-theme="dark"] {
-  /* pulse accent (coral-orange) */
-  --primary: #ef7a53;
-  --primary-dark: #d9612f;
-  --primary-rgb: 239, 122, 83;
+  /* terminal/amber accent, matching the portfolio's original dark aesthetic */
+  --primary: #ffb000;
+  --primary-dark: #d99000;
+  --primary-rgb: 255, 176, 0;
+  --on-primary: #0a0a0a;
 
-  --secondary: #3fa38c;
-  --success: #4caf7d;
-  --warning: #e0a838;
-  --danger: #e5695f;
+  --secondary: #34d399;
+  --success: #34d399;
+  --warning: #ffb000;
+  --danger: #e5484d;
 
   /* surfaces */
-  --dark: #0c130f;
-  --dark-secondary: #141d17;
-  --surface-raised: #182219;
+  --dark: #0a0a0a;
+  --dark-secondary: #121212;
+  --surface-raised: #1a1a1a;
 
   /* text */
-  --text: #ecece4;
-  --text-muted: #8fa093;
-  --border: #253028;
+  --text: #edebe4;
+  --text-muted: #8a8a82;
+  --border: #2a2a28;
+
+  --overlay: rgba(0, 0, 0, 0.75);
 }
 
 [data-theme="light"] {
@@ -41,6 +44,7 @@
   --primary: #e2653d;
   --primary-dark: #c1512e;
   --primary-rgb: 226, 101, 61;
+  --on-primary: #ffffff;
 
   --secondary: #2f7a6b;
   --success: #2f9455;
@@ -56,6 +60,8 @@
   --text: #1c2a20;
   --text-muted: #63705f;
   --border: #e6dfcd;
+
+  --overlay: rgba(28, 42, 32, 0.5);
 }
 
 body {
@@ -71,6 +77,10 @@ h1, h2, h3, h4, h5, h6 {
 
 .font-mono-data {
   font-family: 'JetBrains Mono', monospace;
+}
+
+.text-on-primary {
+  color: var(--on-primary);
 }
 
 ::-webkit-scrollbar {

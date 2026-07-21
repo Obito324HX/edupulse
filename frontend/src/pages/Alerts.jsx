@@ -55,7 +55,7 @@ export default function Alerts() {
             </div>
             {!alert.resolved && ['lecturer', 'institution_admin', 'super_admin'].includes(user?.role) && (
               <button onClick={() => resolve.mutate(alert.id)}
-                className='px-4 py-2 rounded-xl text-xs font-medium text-white flex-shrink-0'
+                className='px-4 py-2 rounded-xl text-xs font-medium text-on-primary flex-shrink-0'
                 style={{ background: 'var(--success)' }}>
                 Resolve
               </button>
