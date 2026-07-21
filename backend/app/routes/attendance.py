@@ -9,7 +9,7 @@ from datetime import date
 attendance_bp = Blueprint('attendance', __name__)
 
 def get_current_user():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     return User.query.get(user_id)
 
 def check_attendance_alert(student_id, course_id):

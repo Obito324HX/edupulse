@@ -7,7 +7,7 @@ from app.models.user import User
 courses_bp = Blueprint('courses', __name__)
 
 def get_current_user():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     return User.query.get(user_id)
 
 @courses_bp.route('/departments', methods=['GET'])

@@ -10,7 +10,7 @@ from sqlalchemy import func
 grades_bp = Blueprint('grades', __name__)
 
 def get_current_user():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     return User.query.get(user_id)
 
 def check_and_create_alert(student_id, course_id):

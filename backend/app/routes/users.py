@@ -6,7 +6,7 @@ from app.models.user import User
 users_bp = Blueprint('users', __name__)
 
 def get_current_user():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     return User.query.get(user_id)
 
 @users_bp.route('/', methods=['GET'])

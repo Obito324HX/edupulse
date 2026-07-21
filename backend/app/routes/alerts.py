@@ -8,7 +8,7 @@ from datetime import datetime
 alerts_bp = Blueprint('alerts', __name__)
 
 def get_current_user():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     return User.query.get(user_id)
 
 @alerts_bp.route('/', methods=['GET'])
