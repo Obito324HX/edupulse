@@ -26,9 +26,9 @@ export default function Institutions() {
   })
 
   const getStatusStyle = (status) => {
-    if (status === 'active') return { background: '#22c55e20', color: '#22c55e' }
-    if (status === 'trial') return { background: '#f59e0b20', color: '#f59e0b' }
-    return { background: '#ef444420', color: '#ef4444' }
+    if (status === 'active') return { background: 'color-mix(in srgb, var(--success) 15%, transparent)', color: 'var(--success)' }
+    if (status === 'trial') return { background: 'color-mix(in srgb, var(--warning) 15%, transparent)', color: 'var(--warning)' }
+    return { background: 'color-mix(in srgb, var(--danger) 15%, transparent)', color: 'var(--danger)' }
   }
 
   const inputStyle = { background: 'var(--dark)', border: '1px solid var(--border)', color: 'var(--text)' }

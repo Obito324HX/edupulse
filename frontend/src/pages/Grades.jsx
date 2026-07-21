@@ -45,9 +45,9 @@ export default function Grades() {
   })
 
   const getColor = (pct) => {
-    if (pct >= 70) return '#22c55e'
-    if (pct >= 50) return '#f59e0b'
-    return '#ef4444'
+    if (pct >= 70) return 'var(--success)'
+    if (pct >= 50) return 'var(--warning)'
+    return 'var(--danger)'
   }
 
   const inputStyle = { background: 'var(--dark)', border: '1px solid var(--border)', color: 'var(--text)' }

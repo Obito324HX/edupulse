@@ -9,11 +9,11 @@ function StatCard({ icon: Icon, label, value, color }) {
     <div className='rounded-2xl p-6' style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
       <div className='flex items-center justify-between mb-4'>
         <span className='text-sm font-medium' style={{ color: 'var(--text-muted)' }}>{label}</span>
-        <div className='w-10 h-10 rounded-xl flex items-center justify-center' style={{ background: color + '20' }}>
+        <div className='w-10 h-10 rounded-xl flex items-center justify-center' style={{ background: `color-mix(in srgb, ${color} 15%, transparent)` }}>
           <Icon size={20} style={{ color }} />
         </div>
       </div>
-      <p className='text-3xl font-bold' style={{ color: 'var(--text)' }}>{value}</p>
+      <p className='text-3xl font-bold font-mono-data' style={{ color: 'var(--text)' }}>{value}</p>
     </div>
   )
 }
@@ -69,13 +69,13 @@ export default function Dashboard() {
       {/* Stats */}
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
         {['institution_admin', 'super_admin', 'lecturer'].includes(user?.role) && (
-          <StatCard icon={Users} label='Total Students' value={students?.length || 0} color='#6366f1' />
+          <StatCard icon={Users} label='Total Students' value={students?.length || 0} color='var(--primary)' />
         )}
-        <StatCard icon={BookOpen} label='Courses' value={courses?.length || 0} color='#06b6d4' />
-        <StatCard icon={Bell} label='Unread Notifications' value={unreadCount} color='#f59e0b' />
+        <StatCard icon={BookOpen} label='Courses' value={courses?.length || 0} color='var(--secondary)' />
+        <StatCard icon={Bell} label='Unread Notifications' value={unreadCount} color='var(--warning)' />
         {['institution_admin', 'super_admin'].includes(user?.role) && (
           <>
-            <StatCard icon={AlertTriangle} label='Unresolved Alerts' value={alertStats?.unresolved_alerts || 0} color='#ef4444' />
+            <StatCard icon={AlertTriangle} label='Unresolved Alerts' value={alertStats?.unresolved_alerts || 0} color='var(--danger)' />
           </>
         )}
       </div>
@@ -87,14 +87,14 @@ export default function Dashboard() {
           <h2 className='text-lg font-semibold mb-6' style={{ color: 'var(--text)' }}>Performance Trend</h2>
           <ResponsiveContainer width='100%' height={250}>
             <LineChart data={sampleData}>
-              <CartesianGrid strokeDasharray='3 3' stroke='#334155' />
-              <XAxis dataKey='month' stroke='#94a3b8' tick={{ fontSize: 12 }} />
-              <YAxis stroke='#94a3b8' tick={{ fontSize: 12 }} />
+              <CartesianGrid strokeDasharray='3 3' stroke='var(--border)' />
+              <XAxis dataKey='month' stroke='var(--text-muted)' tick={{ fontSize: 12 }} />
+              <YAxis stroke='var(--text-muted)' tick={{ fontSize: 12 }} />
               <Tooltip
-                contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
-                labelStyle={{ color: '#f1f5f9' }}
+                contentStyle={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: '8px' }}
+                labelStyle={{ color: 'var(--text)' }}
               />
-              <Line type='monotone' dataKey='average' stroke='#6366f1' strokeWidth={2} dot={{ fill: '#6366f1' }} />
+              <Line type='monotone' dataKey='average' stroke='var(--primary)' strokeWidth={2} dot={{ fill: 'var(--primary)' }} />
             </LineChart>
           </ResponsiveContainer>
         </div>

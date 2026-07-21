@@ -22,9 +22,9 @@ export default function Alerts() {
   })
 
   const getSeverityStyle = (severity) => {
-    if (severity === 'high') return { background: '#ef444420', color: '#ef4444', border: '1px solid #ef444440' }
-    if (severity === 'medium') return { background: '#f59e0b20', color: '#f59e0b', border: '1px solid #f59e0b40' }
-    return { background: '#6366f120', color: '#6366f1', border: '1px solid #6366f140' }
+    if (severity === 'high') return { background: 'color-mix(in srgb, var(--danger) 15%, transparent)', color: 'var(--danger)', border: '1px solid color-mix(in srgb, var(--danger) 30%, transparent)' }
+    if (severity === 'medium') return { background: 'color-mix(in srgb, var(--warning) 15%, transparent)', color: 'var(--warning)', border: '1px solid color-mix(in srgb, var(--warning) 30%, transparent)' }
+    return { background: 'color-mix(in srgb, var(--primary) 15%, transparent)', color: 'var(--primary)', border: '1px solid color-mix(in srgb, var(--primary) 30%, transparent)' }
   }
 
   return (
@@ -62,7 +62,7 @@ export default function Alerts() {
             )}
             {alert.resolved && (
               <span className='px-3 py-1 rounded-full text-xs font-medium'
-                style={{ background: '#22c55e20', color: '#22c55e' }}>
+                style={{ background: 'color-mix(in srgb, var(--success) 15%, transparent)', color: 'var(--success)' }}>
                 Resolved
               </span>
             )}
