@@ -37,21 +37,23 @@ export default function Register() {
   }
 
   return (
-    <div className='min-h-screen flex items-center justify-center p-4 relative'
+    <div className='min-h-screen flex items-center justify-center p-4 sm:p-6 relative'
       style={{ background: 'var(--dark)' }}>
-      <div className='absolute top-4 right-4'>
+      <div className='absolute top-5 right-5'>
         <ThemeToggle variant='icon' />
       </div>
       <div className='w-full max-w-md'>
         <div className='text-center mb-8'>
-          <div className='mx-auto mb-4 w-fit'>
-            <PulseLogo size={64} />
+          <div className='mx-auto mb-5 w-fit'>
+            <PulseLogo size={56} />
           </div>
-          <h1 className='text-3xl font-bold' style={{ color: 'var(--text)' }}>EduPulse</h1>
-          <p className='mt-1' style={{ color: 'var(--text-muted)' }}>Create your account</p>
+          <h1 className='text-4xl font-semibold' style={{ color: 'var(--text)' }}>
+            Edu<span className='text-accent'>Pulse</span>
+          </h1>
+          <p className='mt-2 text-sm' style={{ color: 'var(--text-muted)' }}>Create your account</p>
         </div>
-        <div className='rounded-2xl p-8' style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
-          <h2 className='text-xl font-semibold mb-6' style={{ color: 'var(--text)' }}>Sign up</h2>
+        <div className='rounded-3xl p-8 shadow-2xl' style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
+          <h2 className='text-xl font-semibold mb-6' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>Sign up</h2>
           <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
             <div className='grid grid-cols-2 gap-3'>
               <div>
@@ -108,9 +110,8 @@ export default function Register() {
                 style={inputStyle} />
             </div>
             <button type='submit' disabled={loading}
-              className='w-full py-3 rounded-xl font-semibold text-sm text-on-primary transition-all mt-2'
-              style={{ background: loading ? 'var(--border)' : 'var(--primary)' }}>
-              {loading ? 'Creating account...' : 'Create account'}
+              className='pill-btn-primary w-full mt-2 disabled:opacity-60'>
+              {loading ? 'Creating account…' : 'Create account'}
             </button>
           </form>
           <p className='text-center text-sm mt-6' style={{ color: 'var(--text-muted)' }}>

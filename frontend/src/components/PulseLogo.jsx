@@ -13,7 +13,7 @@ export default function PulseLogo({ size = 32 }) {
       >
         <path
           d='M2 16H9L12 6L18 26L21 16H30'
-          stroke='white'
+          stroke='var(--on-primary)'
           strokeWidth='2.5'
           strokeLinecap='round'
           strokeLinejoin='round'

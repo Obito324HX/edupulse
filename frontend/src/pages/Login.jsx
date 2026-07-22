@@ -27,47 +27,77 @@ export default function Login() {
     }
   }
 
+  const inputStyle = {
+    background: 'var(--dark)',
+    border: '1px solid var(--border)',
+    color: 'var(--text)'
+  }
+
   return (
-    <div className='min-h-screen flex items-center justify-center p-4 relative'
+    <div className='min-h-screen flex items-center justify-center p-4 sm:p-6 relative'
       style={{ background: 'var(--dark)' }}>
-      <div className='absolute top-4 right-4'>
+
+      <div className='absolute top-5 right-5'>
         <ThemeToggle variant='icon' />
       </div>
+
       <div className='w-full max-w-md'>
+
+        {/* Brand mark */}
         <div className='text-center mb-8'>
-          <div className='mx-auto mb-4 w-fit'>
-            <PulseLogo size={64} />
+          <div className='mx-auto mb-5 w-fit'>
+            <PulseLogo size={56} />
           </div>
-          <h1 className='text-3xl font-bold' style={{ color: 'var(--text)' }}>EduPulse</h1>
-          <p className='mt-1' style={{ color: 'var(--text-muted)' }}>
+          <div className='inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium mb-5'
+            style={{
+              background: 'color-mix(in srgb, var(--success) 12%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--success) 25%, transparent)',
+              color: 'var(--success)'
+            }}>
+            <span className='w-1.5 h-1.5 rounded-full' style={{ background: 'var(--success)' }} />
+            Academic pulse, tracked live
+          </div>
+          <h1 className='text-4xl font-semibold' style={{ color: 'var(--text)' }}>
+            Edu<span className='text-accent'>Pulse</span>
+          </h1>
+          <p className='mt-2 text-sm' style={{ color: 'var(--text-muted)' }}>
             Keep your students' academic heartbeat strong
           </p>
         </div>
-        <div className='rounded-2xl p-8' style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
-          <h2 className='text-xl font-semibold mb-6' style={{ color: 'var(--text)' }}>Sign in</h2>
+
+        {/* Card */}
+        <div className='rounded-3xl p-8 shadow-2xl'
+          style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
+          <h2 className='text-xl font-semibold mb-1' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>
+            Welcome back
+          </h2>
+          <p className='text-sm mb-6' style={{ color: 'var(--text-muted)' }}>
+            Sign in to your institution's dashboard
+          </p>
+
           <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
             <div>
               <label className='block text-sm font-medium mb-2' style={{ color: 'var(--text-muted)' }}>Email</label>
               <input type='email' value={form.email}
                 onChange={e => setForm({ ...form, email: e.target.value })}
                 placeholder='you@example.com' required
-                className='w-full px-4 py-3 rounded-xl text-sm outline-none transition-all'
-                style={{ background: 'var(--dark)', border: '1px solid var(--border)', color: 'var(--text)' }} />
+                className='w-full px-4 py-3 rounded-xl text-sm outline-none transition-all focus:ring-2'
+                style={{ ...inputStyle, '--tw-ring-color': 'color-mix(in srgb, var(--primary) 35%, transparent)' }} />
             </div>
             <div>
               <label className='block text-sm font-medium mb-2' style={{ color: 'var(--text-muted)' }}>Password</label>
               <input type='password' value={form.password}
                 onChange={e => setForm({ ...form, password: e.target.value })}
                 placeholder='••••••••' required
-                className='w-full px-4 py-3 rounded-xl text-sm outline-none transition-all'
-                style={{ background: 'var(--dark)', border: '1px solid var(--border)', color: 'var(--text)' }} />
+                className='w-full px-4 py-3 rounded-xl text-sm outline-none transition-all focus:ring-2'
+                style={{ ...inputStyle, '--tw-ring-color': 'color-mix(in srgb, var(--primary) 35%, transparent)' }} />
             </div>
             <button type='submit' disabled={loading}
-              className='w-full py-3 rounded-xl font-semibold text-sm text-on-primary transition-all mt-2'
-              style={{ background: loading ? 'var(--border)' : 'var(--primary)' }}>
-              {loading ? 'Signing in...' : 'Sign in'}
+              className='pill-btn-primary w-full mt-2 disabled:opacity-60'>
+              {loading ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
+
           <p className='text-center text-sm mt-6' style={{ color: 'var(--text-muted)' }}>
             Don't have an account?{' '}
             <Link to='/register' style={{ color: 'var(--primary)' }} className='font-medium hover:underline'>

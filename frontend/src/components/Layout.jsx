@@ -104,7 +104,7 @@ export default function Layout() {
         <div className='flex items-center justify-between p-4' style={{ borderBottom: '1px solid var(--border)' }}>
           <div className='flex items-center gap-2 min-w-0'>
             <PulseLogo size={32} />
-            <span className='font-bold text-lg truncate' style={{ color: 'var(--text)', fontFamily: "'Space Grotesk', sans-serif" }}>EduPulse</span>
+            <span className='font-bold text-lg truncate' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>EduPulse</span>
           </div>
           <button onClick={() => setMobileOpen(false)}
             style={{ color: 'var(--text-muted)' }}
@@ -124,7 +124,7 @@ export default function Layout() {
           {sidebarOpen && (
             <div className='flex items-center gap-2 min-w-0'>
               <PulseLogo size={32} />
-              <span className='font-bold text-lg truncate' style={{ color: 'var(--text)', fontFamily: "'Space Grotesk', sans-serif" }}>EduPulse</span>
+              <span className='font-bold text-lg truncate' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>EduPulse</span>
             </div>
           )}
           <button onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -150,7 +150,7 @@ export default function Layout() {
           </button>
           <div className='flex items-center gap-2'>
             <PulseLogo size={26} />
-            <span className='font-bold' style={{ color: 'var(--text)', fontFamily: "'Space Grotesk', sans-serif" }}>EduPulse</span>
+            <span className='font-bold' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>EduPulse</span>
           </div>
           <ThemeToggle variant='icon' />
         </div>
