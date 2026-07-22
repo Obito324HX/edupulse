@@ -13,7 +13,10 @@ mail = Mail()
 
 def create_app(config_name='default'):
     app = Flask(__name__)
-    app.config.from_object(config[config_name])
+    selected_config = config[config_name]
+    if hasattr(selected_config, 'validate'):
+        selected_config.validate()
+    app.config.from_object(selected_config)
 
     db.init_app(app)
     migrate.init_app(app, db)
