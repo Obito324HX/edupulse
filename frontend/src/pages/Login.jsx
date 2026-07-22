@@ -3,11 +3,14 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
+import { Eye, EyeOff } from 'lucide-react'
 import PulseLogo from '../components/PulseLogo'
 import ThemeToggle from '../components/ThemeToggle'
+import FloatingInput from '../components/FloatingInput'
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' })
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const { login } = useAuthStore()
   const navigate = useNavigate()
@@ -25,12 +28,6 @@ export default function Login() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const inputStyle = {
-    background: 'var(--dark)',
-    border: '1px solid var(--border)',
-    color: 'var(--text)'
   }
 
   return (
@@ -72,26 +69,33 @@ export default function Login() {
             Welcome back
           </h2>
           <p className='text-sm mb-6' style={{ color: 'var(--text-muted)' }}>
-            Sign in to your institution's dashboard
+            Please sign in to continue to your account
           </p>
 
           <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
-            <div>
-              <label className='block text-sm font-medium mb-2' style={{ color: 'var(--text-muted)' }}>Email</label>
-              <input type='email' value={form.email}
-                onChange={e => setForm({ ...form, email: e.target.value })}
-                placeholder='you@example.com' required
-                className='w-full px-4 py-3 rounded-xl text-sm outline-none transition-all focus:ring-2'
-                style={{ ...inputStyle, '--tw-ring-color': 'color-mix(in srgb, var(--primary) 35%, transparent)' }} />
-            </div>
-            <div>
-              <label className='block text-sm font-medium mb-2' style={{ color: 'var(--text-muted)' }}>Password</label>
-              <input type='password' value={form.password}
-                onChange={e => setForm({ ...form, password: e.target.value })}
-                placeholder='••••••••' required
-                className='w-full px-4 py-3 rounded-xl text-sm outline-none transition-all focus:ring-2'
-                style={{ ...inputStyle, '--tw-ring-color': 'color-mix(in srgb, var(--primary) 35%, transparent)' }} />
-            </div>
+            <FloatingInput
+              label='Email'
+              type='email'
+              autoComplete='email'
+              value={form.email}
+              onChange={e => setForm({ ...form, email: e.target.value })}
+              required
+            />
+            <FloatingInput
+              label='Password'
+              type={showPassword ? 'text' : 'password'}
+              autoComplete='current-password'
+              value={form.password}
+              onChange={e => setForm({ ...form, password: e.target.value })}
+              required
+              rightSlot={
+                <button type='button' onClick={() => setShowPassword(v => !v)}
+                  style={{ color: 'var(--text-muted)' }} tabIndex={-1}>
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              }
+            />
+
             <button type='submit' disabled={loading}
               className='pill-btn-primary w-full mt-2 disabled:opacity-60'>
               {loading ? 'Signing in…' : 'Sign in'}
