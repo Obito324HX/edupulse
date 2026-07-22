@@ -15,15 +15,27 @@ def register():
         if not data.get(field):
             return jsonify({'error': f'{field} is required'}), 400
 
+    # Public self-registration must never be able to grant staff or platform
+    # access. Lecturer / institution_admin accounts are created by an
+    # already-trusted admin via POST /users/staff (see users.py), and
+    # super_admin accounts are never created through a public endpoint.
+    SELF_REGISTERABLE_ROLES = {'student', 'parent'}
+    if data['role'] not in SELF_REGISTERABLE_ROLES:
+        return jsonify({'error': 'This role cannot be self-registered. Contact your institution administrator.'}), 403
+
     if User.query.filter_by(email=data['email']).first():
         return jsonify({'error': 'Email already exists'}), 409
+
+    institution_id = data.get('institution_id')
+    if institution_id is not None and not Institution.query.get(institution_id):
+        return jsonify({'error': 'Invalid institution_id'}), 400
 
     user = User(
         first_name=data['first_name'],
         last_name=data['last_name'],
         email=data['email'],
         role=data['role'],
-        institution_id=data.get('institution_id'),
+        institution_id=institution_id,
         phone=data.get('phone')
     )
     user.set_password(data['password'])

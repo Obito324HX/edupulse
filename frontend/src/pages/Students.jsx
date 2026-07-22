@@ -1,14 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../utils/api'
-import { Users, Search, UserPlus, X } from 'lucide-react'
+import { Users, Search, UserPlus, X, ShieldPlus } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
+import { useAuthStore } from '../store/authStore'
 
 export default function Students() {
+  const { user } = useAuthStore()
   const [search, setSearch] = useState('')
   const [showEnrollModal, setShowEnrollModal] = useState(false)
+  const [showStaffModal, setShowStaffModal] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [selectedCourse, setSelectedCourse] = useState('')
+  const [staffForm, setStaffForm] = useState({ first_name: '', last_name: '', email: '', phone: '', password: '', role: 'lecturer' })
   const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery({
@@ -32,6 +36,17 @@ export default function Students() {
     onError: (err) => toast.error(err.response?.data?.error || 'Failed to enroll student')
   })
 
+  const createStaff = useMutation({
+    mutationFn: (data) => api.post('/users/staff', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['users'])
+      toast.success('Staff account created!')
+      setShowStaffModal(false)
+      setStaffForm({ first_name: '', last_name: '', email: '', phone: '', password: '', role: 'lecturer' })
+    },
+    onError: (err) => toast.error(err.response?.data?.error || 'Failed to create staff account')
+  })
+
   const filtered = data?.filter(s =>
     `${s.first_name} ${s.last_name} ${s.email}`.toLowerCase().includes(search.toLowerCase())
   )
@@ -45,6 +60,12 @@ export default function Students() {
           <h1 className='text-2xl font-bold' style={{ color: 'var(--text)' }}>Students</h1>
           <p className='text-sm mt-1' style={{ color: 'var(--text-muted)' }}>Manage and monitor all students</p>
         </div>
+        {['institution_admin', 'super_admin'].includes(user?.role) && (
+          <button onClick={() => setShowStaffModal(true)}
+            className='pill-btn-primary flex items-center gap-2'>
+            <ShieldPlus size={16} /> Add Staff
+          </button>
+        )}
       </div>
 
       {/* Search */}
@@ -141,6 +162,45 @@ export default function Students() {
                 className='w-full py-3 rounded-xl font-semibold text-sm text-on-primary mt-2'
                 style={{ background: !selectedCourse || enroll.isPending ? 'var(--border)' : 'var(--primary)' }}>
                 {enroll.isPending ? 'Enrolling...' : 'Enroll Student'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Staff Modal */}
+      {showStaffModal && (
+        <div className='fixed inset-0 flex items-center justify-center z-50 p-4'
+          style={{ background: 'var(--overlay)' }}>
+          <div className='w-full max-w-md rounded-2xl p-8'
+            style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
+            <div className='flex items-center justify-between mb-6'>
+              <h2 className='text-lg font-semibold' style={{ color: 'var(--text)' }}>Add staff account</h2>
+              <button onClick={() => setShowStaffModal(false)} style={{ color: 'var(--text-muted)' }}><X size={20} /></button>
+            </div>
+            <div className='flex flex-col gap-3'>
+              <div className='grid grid-cols-2 gap-3'>
+                <input value={staffForm.first_name} onChange={e => setStaffForm({ ...staffForm, first_name: e.target.value })}
+                  placeholder='First name' className='w-full px-4 py-3 rounded-xl text-sm outline-none' style={inputStyle} />
+                <input value={staffForm.last_name} onChange={e => setStaffForm({ ...staffForm, last_name: e.target.value })}
+                  placeholder='Last name' className='w-full px-4 py-3 rounded-xl text-sm outline-none' style={inputStyle} />
+              </div>
+              <input value={staffForm.email} onChange={e => setStaffForm({ ...staffForm, email: e.target.value })}
+                type='email' placeholder='Email' className='w-full px-4 py-3 rounded-xl text-sm outline-none' style={inputStyle} />
+              <input value={staffForm.phone} onChange={e => setStaffForm({ ...staffForm, phone: e.target.value })}
+                placeholder='Phone (optional)' className='w-full px-4 py-3 rounded-xl text-sm outline-none' style={inputStyle} />
+              <input value={staffForm.password} onChange={e => setStaffForm({ ...staffForm, password: e.target.value })}
+                type='password' placeholder='Temporary password' className='w-full px-4 py-3 rounded-xl text-sm outline-none' style={inputStyle} />
+              <div>
+                <label className='block text-sm font-medium mb-2' style={{ color: 'var(--text-muted)' }}>Role</label>
+                <select value={staffForm.role} onChange={e => setStaffForm({ ...staffForm, role: e.target.value })}
+                  className='w-full px-4 py-3 rounded-xl text-sm outline-none' style={inputStyle}>
+                  <option value='lecturer'>Lecturer</option>
+                </select>
+              </div>
+              <button onClick={() => createStaff.mutate(staffForm)}
+                disabled={createStaff.isPending || !staffForm.first_name || !staffForm.last_name || !staffForm.email || !staffForm.password}
+                className='pill-btn-primary w-full mt-2 disabled:opacity-60'>
+                {createStaff.isPending ? 'Creating…' : 'Create staff account'}
               </button>
             </div>
           </div>

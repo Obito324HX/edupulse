@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models.grade import Attendance
 from app.models.user import User
+from app.models.course import Course
 from app.models.alert import Alert, Notification
 from datetime import date
 
@@ -11,6 +12,11 @@ attendance_bp = Blueprint('attendance', __name__)
 def get_current_user():
     user_id = int(get_jwt_identity())
     return User.query.get(user_id)
+
+def same_institution_or_super(current_user, target_institution_id):
+    if current_user.role == 'super_admin':
+        return True
+    return current_user.institution_id is not None and current_user.institution_id == target_institution_id
 
 def check_attendance_alert(student_id, course_id):
     records = Attendance.query.filter_by(student_id=student_id, course_id=course_id).all()
@@ -62,6 +68,14 @@ def mark_attendance():
         if not data.get(field):
             return jsonify({'error': f'{field} is required'}), 400
 
+    course = Course.query.get_or_404(data['course_id'])
+    student = User.query.get_or_404(data['student_id'])
+
+    if not same_institution_or_super(current_user, course.institution_id):
+        return jsonify({'error': 'Unauthorized'}), 403
+    if student.institution_id != course.institution_id:
+        return jsonify({'error': 'Student does not belong to this course\'s institution'}), 400
+
     attendance_date = date.fromisoformat(data['date'])
 
     existing = Attendance.query.filter_by(
@@ -95,9 +109,13 @@ def mark_attendance():
 @jwt_required()
 def get_student_attendance(student_id):
     current_user = get_current_user()
+    student = User.query.get_or_404(student_id)
 
-    if current_user.id != student_id and current_user.role not in ['lecturer', 'institution_admin', 'super_admin']:
-        return jsonify({'error': 'Unauthorized'}), 403
+    if current_user.id != student_id:
+        if current_user.role not in ['lecturer', 'institution_admin', 'super_admin']:
+            return jsonify({'error': 'Unauthorized'}), 403
+        if not same_institution_or_super(current_user, student.institution_id):
+            return jsonify({'error': 'Unauthorized'}), 403
 
     course_id = request.args.get('course_id')
 
@@ -114,6 +132,10 @@ def get_course_attendance_summary(course_id):
     current_user = get_current_user()
 
     if current_user.role not in ['lecturer', 'institution_admin', 'super_admin']:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    course = Course.query.get_or_404(course_id)
+    if not same_institution_or_super(current_user, course.institution_id):
         return jsonify({'error': 'Unauthorized'}), 403
 
     records = Attendance.query.filter_by(course_id=course_id).all()

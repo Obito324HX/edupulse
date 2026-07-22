@@ -68,6 +68,8 @@ def create_institution():
 def update_institution(institution_id):
     current_user = get_current_user()
 
+    if current_user.role not in ['super_admin', 'institution_admin']:
+        return jsonify({'error': 'Unauthorized'}), 403
     if current_user.role != 'super_admin' and current_user.institution_id != institution_id:
         return jsonify({'error': 'Unauthorized'}), 403
 

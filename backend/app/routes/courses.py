@@ -10,6 +10,11 @@ def get_current_user():
     user_id = int(get_jwt_identity())
     return User.query.get(user_id)
 
+def same_institution_or_super(current_user, target_institution_id):
+    if current_user.role == 'super_admin':
+        return True
+    return current_user.institution_id is not None and current_user.institution_id == target_institution_id
+
 @courses_bp.route('/departments', methods=['GET'])
 @jwt_required()
 def get_departments():
@@ -95,9 +100,11 @@ def update_course(course_id):
         return jsonify({'error': 'Unauthorized'}), 403
 
     course = Course.query.get_or_404(course_id)
-    data = request.get_json()
 
-    course.name = data.get('name', course.name)
+    if not same_institution_or_super(current_user, course.institution_id):
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    data = request.get_json()
     course.code = data.get('code', course.code)
     course.lecturer_id = data.get('lecturer_id', course.lecturer_id)
     course.semester = data.get('semester', course.semester)
@@ -118,6 +125,14 @@ def enroll_student(course_id):
     data = request.get_json()
     student_id = data.get('student_id')
 
+    course = Course.query.get_or_404(course_id)
+    if not same_institution_or_super(current_user, course.institution_id):
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    student = User.query.get_or_404(student_id)
+    if student.institution_id != course.institution_id:
+        return jsonify({'error': 'Student does not belong to this course\'s institution'}), 400
+
     existing = Enrollment.query.filter_by(student_id=student_id, course_id=course_id).first()
     if existing:
         return jsonify({'error': 'Student already enrolled'}), 409
@@ -134,6 +149,10 @@ def get_course_students(course_id):
     current_user = get_current_user()
 
     if current_user.role not in ['super_admin', 'institution_admin', 'lecturer']:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    course = Course.query.get_or_404(course_id)
+    if not same_institution_or_super(current_user, course.institution_id):
         return jsonify({'error': 'Unauthorized'}), 403
 
     enrollments = Enrollment.query.filter_by(course_id=course_id).all()

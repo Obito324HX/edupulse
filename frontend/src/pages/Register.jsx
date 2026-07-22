@@ -93,8 +93,6 @@ export default function Register() {
               onChange={e => setForm({ ...form, role: e.target.value })}
             >
               <option value='student'>Student</option>
-              <option value='lecturer'>Lecturer</option>
-              <option value='institution_admin'>Institution Admin</option>
               <option value='parent'>Parent/Guardian</option>
             </FloatingInput>
             <FloatingInput
