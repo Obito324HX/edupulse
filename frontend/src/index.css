@@ -15,53 +15,53 @@
 
 :root,
 [data-theme="dark"] {
-  /* terminal/amber accent, matching the portfolio's original dark aesthetic */
-  --primary: #ffb000;
-  --primary-dark: #d99000;
-  --primary-rgb: 255, 176, 0;
-  --on-primary: #0a0a0a;
+  /* gold accent, matching the portfolio's dark palette */
+  --primary: #c9a468;
+  --primary-dark: #a88751;
+  --primary-rgb: 201, 164, 104;
+  --on-primary: #0a0812;
 
-  --secondary: #34d399;
-  --success: #34d399;
-  --warning: #ffb000;
-  --danger: #e5484d;
+  --secondary: #9b8cf0;
+  --success: #34c58a;
+  --warning: #dcc08a;
+  --danger: #e2687a;
 
   /* surfaces */
-  --dark: #0a0a0a;
-  --dark-secondary: #121212;
-  --surface-raised: #1a1a1a;
+  --dark: #0a0812;
+  --dark-secondary: #14101f;
+  --surface-raised: #1b1530;
 
   /* text */
-  --text: #edebe4;
-  --text-muted: #8a8a82;
-  --border: #2a2a28;
+  --text: #e8e4f3;
+  --text-muted: #8f86c9;
+  --border: #241e38;
 
-  --overlay: rgba(0, 0, 0, 0.75);
+  --overlay: rgba(10, 8, 18, 0.75);
 }
 
 [data-theme="light"] {
-  /* pulse accent (coral-orange, slightly deeper for contrast on paper) */
-  --primary: #e2653d;
-  --primary-dark: #c1512e;
-  --primary-rgb: 226, 101, 61;
+  /* gold accent, matching the portfolio's light palette */
+  --primary: #9c6b1f;
+  --primary-dark: #7c5417;
+  --primary-rgb: 156, 107, 31;
   --on-primary: #ffffff;
 
-  --secondary: #2f7a6b;
-  --success: #2f9455;
-  --warning: #b9791c;
+  --secondary: #7c5cfc;
+  --success: #1e8e5a;
+  --warning: #b8862b;
   --danger: #c9483f;
 
   /* surfaces */
-  --dark: #faf6ee;
+  --dark: #faf9f6;
   --dark-secondary: #ffffff;
-  --surface-raised: #fffdf9;
+  --surface-raised: #ffffff;
 
   /* text */
-  --text: #1c2a20;
-  --text-muted: #63705f;
-  --border: #e6dfcd;
+  --text: #1c1b19;
+  --text-muted: #8a8478;
+  --border: #e9e4da;
 
-  --overlay: rgba(28, 42, 32, 0.5);
+  --overlay: rgba(28, 27, 25, 0.5);
 }
 
 body {
@@ -72,7 +72,47 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+.text-accent {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  color: var(--primary);
+}
+
+.pill-btn-primary {
+  background: var(--text);
+  color: var(--dark);
+  padding: 0.85rem 1.75rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.pill-btn-primary:hover {
+  background: var(--primary);
+  color: var(--on-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(var(--primary-rgb), 0.25);
+}
+
+.pill-btn-ghost {
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.85rem 1.75rem;
+  border-radius: 999px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease, transform 0.15s ease, background 0.2s ease;
+}
+
+.pill-btn-ghost:hover {
+  border-color: var(--primary);
+  background: var(--surface-raised);
+  transform: translateY(-1px);
 }
 
 .font-mono-data {

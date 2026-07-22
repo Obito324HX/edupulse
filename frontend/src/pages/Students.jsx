@@ -40,7 +40,7 @@ export default function Students() {
 
   return (
     <div className='flex flex-col gap-6'>
-      <div className='flex items-center justify-between'>
+      <div className='flex items-center justify-between flex-wrap gap-3'>
         <div>
           <h1 className='text-2xl font-bold' style={{ color: 'var(--text)' }}>Students</h1>
           <p className='text-sm mt-1' style={{ color: 'var(--text-muted)' }}>Manage and monitor all students</p>
@@ -59,6 +59,7 @@ export default function Students() {
 
       {/* Table */}
       <div className='rounded-2xl overflow-hidden' style={{ border: '1px solid var(--border)' }}>
+        <div className='overflow-x-auto'>
         <table className='w-full'>
           <thead>
             <tr style={{ background: 'var(--dark-secondary)' }}>
@@ -111,6 +112,7 @@ export default function Students() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Enroll Modal */}
