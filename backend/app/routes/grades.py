@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models.grade import Grade
 from app.models.user import User
-from app.models.course import Enrollment
+from app.models.course import Course, Enrollment
 from app.models.alert import Alert, Notification
 from sqlalchemy import func
 
@@ -12,6 +12,11 @@ grades_bp = Blueprint('grades', __name__)
 def get_current_user():
     user_id = int(get_jwt_identity())
     return User.query.get(user_id)
+
+def same_institution_or_super(current_user, target_institution_id):
+    if current_user.role == 'super_admin':
+        return True
+    return current_user.institution_id is not None and current_user.institution_id == target_institution_id
 
 def check_and_create_alert(student_id, course_id):
     grades = Grade.query.filter_by(student_id=student_id, course_id=course_id).all()
@@ -61,6 +66,14 @@ def add_grade():
         if data.get(field) is None:
             return jsonify({'error': f'{field} is required'}), 400
 
+    course = Course.query.get_or_404(data['course_id'])
+    student = User.query.get_or_404(data['student_id'])
+
+    if not same_institution_or_super(current_user, course.institution_id):
+        return jsonify({'error': 'Unauthorized'}), 403
+    if student.institution_id != course.institution_id:
+        return jsonify({'error': 'Student does not belong to this course\'s institution'}), 400
+
     grade = Grade(
         student_id=data['student_id'],
         course_id=data['course_id'],
@@ -83,9 +96,13 @@ def add_grade():
 @jwt_required()
 def get_student_grades(student_id):
     current_user = get_current_user()
+    student = User.query.get_or_404(student_id)
 
-    if current_user.id != student_id and current_user.role not in ['lecturer', 'institution_admin', 'super_admin']:
-        return jsonify({'error': 'Unauthorized'}), 403
+    if current_user.id != student_id:
+        if current_user.role not in ['lecturer', 'institution_admin', 'super_admin']:
+            return jsonify({'error': 'Unauthorized'}), 403
+        if not same_institution_or_super(current_user, student.institution_id):
+            return jsonify({'error': 'Unauthorized'}), 403
 
     grades = Grade.query.filter_by(student_id=student_id).all()
     return jsonify({'grades': [g.to_dict() for g in grades]}), 200
@@ -98,6 +115,10 @@ def get_course_grades(course_id):
     if current_user.role not in ['lecturer', 'institution_admin', 'super_admin']:
         return jsonify({'error': 'Unauthorized'}), 403
 
+    course = Course.query.get_or_404(course_id)
+    if not same_institution_or_super(current_user, course.institution_id):
+        return jsonify({'error': 'Unauthorized'}), 403
+
     grades = Grade.query.filter_by(course_id=course_id).all()
     return jsonify({'grades': [g.to_dict() for g in grades]}), 200
 
@@ -105,9 +126,13 @@ def get_course_grades(course_id):
 @jwt_required()
 def get_student_summary(student_id):
     current_user = get_current_user()
+    student = User.query.get_or_404(student_id)
 
-    if current_user.id != student_id and current_user.role not in ['lecturer', 'institution_admin', 'super_admin']:
-        return jsonify({'error': 'Unauthorized'}), 403
+    if current_user.id != student_id:
+        if current_user.role not in ['lecturer', 'institution_admin', 'super_admin']:
+            return jsonify({'error': 'Unauthorized'}), 403
+        if not same_institution_or_super(current_user, student.institution_id):
+            return jsonify({'error': 'Unauthorized'}), 403
 
     enrollments = Enrollment.query.filter_by(student_id=student_id).all()
     summary = []
@@ -139,6 +164,11 @@ def update_grade(grade_id):
         return jsonify({'error': 'Unauthorized'}), 403
 
     grade = Grade.query.get_or_404(grade_id)
+    course = Course.query.get_or_404(grade.course_id)
+
+    if not same_institution_or_super(current_user, course.institution_id):
+        return jsonify({'error': 'Unauthorized'}), 403
+
     data = request.get_json()
 
     grade.score = data.get('score', grade.score)
