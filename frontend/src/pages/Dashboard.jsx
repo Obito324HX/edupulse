@@ -3,6 +3,7 @@ import { useAuthStore } from '../store/authStore'
 import api from '../utils/api'
 import { Users, BookOpen, Bell, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import PulseRing from '../components/PulseRing'
 
 function StatCard({ icon: Icon, label, value, color }) {
   return (
@@ -24,6 +25,12 @@ export default function Dashboard() {
   const { data: alertStats } = useQuery({
     queryKey: ['alertStats'],
     queryFn: () => api.get('/alerts/stats').then(r => r.data.stats),
+    enabled: ['institution_admin', 'super_admin'].includes(user?.role)
+  })
+
+  const { data: pulse } = useQuery({
+    queryKey: ['pulse'],
+    queryFn: () => api.get('/institutions/pulse').then(r => r.data),
     enabled: ['institution_admin', 'super_admin'].includes(user?.role)
   })
 
@@ -65,6 +72,44 @@ export default function Dashboard() {
           Here's what's happening across your institution today.
         </p>
       </div>
+
+      {/* Pulse hero — institution_admin sees their school's score,
+          super_admin sees the network-wide score across every institution */}
+      {['institution_admin', 'super_admin'].includes(user?.role) && (
+        <div className='rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-6'
+          style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
+          <PulseRing
+            value={pulse?.pulse ?? null}
+            size={140}
+            stroke={10}
+            label={user?.role === 'super_admin' ? 'Network pulse' : 'Institution pulse'}
+            sub={pulse?.pulse != null ? (pulse.pulse >= 75 ? 'Healthy' : pulse.pulse >= 50 ? 'Watch closely' : 'Needs attention') : undefined}
+          />
+          <div className='flex-1 flex flex-col gap-1 w-full'>
+            <p className='text-sm' style={{ color: 'var(--text-muted)' }}>
+              {pulse?.pulse != null
+                ? 'A composite of average grades, attendance, and open alerts.'
+                : 'Once grades and attendance start coming in, this fills in automatically.'}
+            </p>
+            {pulse?.pulse != null && (
+              <div className='flex gap-6 mt-3 flex-wrap'>
+                <div>
+                  <p className='text-xs' style={{ color: 'var(--text-muted)' }}>Avg. grade</p>
+                  <p className='font-mono-data text-lg font-semibold' style={{ color: 'var(--text)' }}>{pulse.grade_average}%</p>
+                </div>
+                <div>
+                  <p className='text-xs' style={{ color: 'var(--text-muted)' }}>Attendance</p>
+                  <p className='font-mono-data text-lg font-semibold' style={{ color: 'var(--text)' }}>{pulse.attendance_rate}%</p>
+                </div>
+                <div>
+                  <p className='text-xs' style={{ color: 'var(--text-muted)' }}>Open alerts</p>
+                  <p className='font-mono-data text-lg font-semibold' style={{ color: 'var(--danger)' }}>{pulse.unresolved_alerts}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
