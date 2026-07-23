@@ -130,6 +130,10 @@ def create_staff():
         institution_id = current_user.institution_id
     else:
         institution_id = data.get('institution_id')
+        try:
+            institution_id = int(institution_id) if institution_id is not None else None
+        except (TypeError, ValueError):
+            institution_id = None
         if not institution_id or not Institution.query.get(institution_id):
             return jsonify({'error': 'A valid institution_id is required'}), 400
 

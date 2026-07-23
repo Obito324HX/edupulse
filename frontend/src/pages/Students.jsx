@@ -12,7 +12,7 @@ export default function Students() {
   const [showStaffModal, setShowStaffModal] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [selectedCourse, setSelectedCourse] = useState('')
-  const [staffForm, setStaffForm] = useState({ first_name: '', last_name: '', email: '', phone: '', password: '', role: 'lecturer' })
+  const [staffForm, setStaffForm] = useState({ first_name: '', last_name: '', email: '', phone: '', password: '', role: 'lecturer', institution_id: '' })
   const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery({
@@ -23,6 +23,12 @@ export default function Students() {
   const { data: courses } = useQuery({
     queryKey: ['courses'],
     queryFn: () => api.get('/courses/').then(r => r.data.courses)
+  })
+
+  const { data: institutions } = useQuery({
+    queryKey: ['institutions'],
+    queryFn: () => api.get('/institutions/').then(r => r.data.institutions),
+    enabled: user?.role === 'super_admin'
   })
 
   const enroll = useMutation({
@@ -42,7 +48,7 @@ export default function Students() {
       queryClient.invalidateQueries(['users'])
       toast.success('Staff account created!')
       setShowStaffModal(false)
-      setStaffForm({ first_name: '', last_name: '', email: '', phone: '', password: '', role: 'lecturer' })
+      setStaffForm({ first_name: '', last_name: '', email: '', phone: '', password: '', role: 'lecturer', institution_id: '' })
     },
     onError: (err) => toast.error(err.response?.data?.error || 'Failed to create staff account')
   })
@@ -195,10 +201,23 @@ export default function Students() {
                 <select value={staffForm.role} onChange={e => setStaffForm({ ...staffForm, role: e.target.value })}
                   className='w-full px-4 py-3 rounded-xl text-sm outline-none' style={inputStyle}>
                   <option value='lecturer'>Lecturer</option>
+                  <option value='institution_admin'>Institution admin</option>
                 </select>
               </div>
+              {user?.role === 'super_admin' && (
+                <div>
+                  <label className='block text-sm font-medium mb-2' style={{ color: 'var(--text-muted)' }}>Institution</label>
+                  <select value={staffForm.institution_id} onChange={e => setStaffForm({ ...staffForm, institution_id: e.target.value })}
+                    className='w-full px-4 py-3 rounded-xl text-sm outline-none' style={inputStyle}>
+                    <option value=''>Select an institution…</option>
+                    {institutions?.map(i => (
+                      <option key={i.id} value={i.id}>{i.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <button onClick={() => createStaff.mutate(staffForm)}
-                disabled={createStaff.isPending || !staffForm.first_name || !staffForm.last_name || !staffForm.email || !staffForm.password}
+                disabled={createStaff.isPending || !staffForm.first_name || !staffForm.last_name || !staffForm.email || !staffForm.password || (user?.role === 'super_admin' && !staffForm.institution_id)}
                 className='pill-btn-primary w-full mt-2 disabled:opacity-60'>
                 {createStaff.isPending ? 'Creating…' : 'Create staff account'}
               </button>
