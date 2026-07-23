@@ -23,6 +23,11 @@ def check_and_create_alert(student_id, course_id):
     if not grades:
         return
 
+    course = Course.query.get(course_id)
+    institution = course.institution if course else None
+    threshold = institution.grade_alert_threshold if institution else 50
+    severe_threshold = institution.grade_alert_severe_threshold if institution else 40
+
     avg = sum(g.percentage() for g in grades) / len(grades)
 
     existing_alert = Alert.query.filter_by(
@@ -31,8 +36,8 @@ def check_and_create_alert(student_id, course_id):
         resolved=False
     ).first()
 
-    if avg < 50 and not existing_alert:
-        severity = 'high' if avg < 40 else 'medium'
+    if avg < threshold and not existing_alert:
+        severity = 'high' if avg < severe_threshold else 'medium'
         alert = Alert(
             student_id=student_id,
             course_id=course_id,

@@ -115,6 +115,17 @@ def update_institution(institution_id):
     institution.phone = data.get('phone', institution.phone)
     institution.logo = data.get('logo', institution.logo)
 
+    threshold_fields = [
+        'grade_alert_threshold', 'grade_alert_severe_threshold',
+        'absence_alert_threshold', 'absence_alert_severe_threshold'
+    ]
+    for field in threshold_fields:
+        if field in data:
+            value = data[field]
+            if not isinstance(value, int) or not (0 <= value <= 100):
+                return jsonify({'error': f'{field} must be a whole number between 0 and 100'}), 400
+            setattr(institution, field, value)
+
     if current_user.role == 'super_admin':
         institution.subscription_status = data.get('subscription_status', institution.subscription_status)
 

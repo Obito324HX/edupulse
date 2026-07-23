@@ -1,17 +1,42 @@
 import { useAuthStore } from '../store/authStore'
-import { User, Mail, Phone, Shield, KeyRound } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
+import { User, Mail, Phone, Shield, KeyRound, SlidersHorizontal } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState, useEffect } from 'react'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
 
 export default function Profile() {
   const { user } = useAuthStore()
+  const queryClient = useQueryClient()
+  const [thresholds, setThresholds] = useState(null)
 
   const { data: institution } = useQuery({
     queryKey: ['institution', user?.institution_id],
     queryFn: () => api.get(`/institutions/${user.institution_id}`).then(r => r.data.institution),
     enabled: user?.role === 'institution_admin' && !!user?.institution_id
   })
+
+  useEffect(() => {
+    if (institution && !thresholds) {
+      setThresholds({
+        grade_alert_threshold: institution.grade_alert_threshold,
+        grade_alert_severe_threshold: institution.grade_alert_severe_threshold,
+        absence_alert_threshold: institution.absence_alert_threshold,
+        absence_alert_severe_threshold: institution.absence_alert_severe_threshold
+      })
+    }
+  }, [institution])
+
+  const saveThresholds = useMutation({
+    mutationFn: (data) => api.put(`/institutions/${user.institution_id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['institution', user.institution_id])
+      toast.success('Alert thresholds updated')
+    },
+    onError: (err) => toast.error(err.response?.data?.error || 'Failed to update thresholds')
+  })
+
+  const inputStyle = { background: 'var(--dark)', border: '1px solid var(--border)', color: 'var(--text)' }
 
   return (
     <div className='flex flex-col gap-6 max-w-2xl'>
@@ -78,6 +103,63 @@ export default function Profile() {
             style={{ background: 'var(--dark)', border: '1px solid var(--border)', color: 'var(--text)' }}
           >
             {institution.join_code}
+          </button>
+        </div>
+      )}
+
+      {user?.role === 'institution_admin' && thresholds && (
+        <div className='rounded-2xl p-6' style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
+          <div className='flex items-center gap-3 mb-4'>
+            <div className='w-10 h-10 rounded-xl flex items-center justify-center'
+              style={{ background: 'color-mix(in srgb, var(--primary) 15%, transparent)' }}>
+              <SlidersHorizontal size={18} style={{ color: 'var(--primary)' }} />
+            </div>
+            <div>
+              <h3 className='font-semibold' style={{ color: 'var(--text)' }}>Alert thresholds</h3>
+              <p className='text-xs' style={{ color: 'var(--text-muted)' }}>Control when EduPulse flags a student for low grades or poor attendance</p>
+            </div>
+          </div>
+
+          <div className='grid grid-cols-2 gap-4 mb-2'>
+            <div>
+              <label className='block text-xs font-medium mb-2' style={{ color: 'var(--text-muted)' }}>
+                Flag grade below (%)
+              </label>
+              <input type='number' min={0} max={100} value={thresholds.grade_alert_threshold}
+                onChange={e => setThresholds({ ...thresholds, grade_alert_threshold: Number(e.target.value) })}
+                className='w-full px-4 py-3 rounded-xl text-sm outline-none' style={inputStyle} />
+            </div>
+            <div>
+              <label className='block text-xs font-medium mb-2' style={{ color: 'var(--text-muted)' }}>
+                Mark high severity below (%)
+              </label>
+              <input type='number' min={0} max={100} value={thresholds.grade_alert_severe_threshold}
+                onChange={e => setThresholds({ ...thresholds, grade_alert_severe_threshold: Number(e.target.value) })}
+                className='w-full px-4 py-3 rounded-xl text-sm outline-none' style={inputStyle} />
+            </div>
+            <div>
+              <label className='block text-xs font-medium mb-2' style={{ color: 'var(--text-muted)' }}>
+                Flag absence rate above (%)
+              </label>
+              <input type='number' min={0} max={100} value={thresholds.absence_alert_threshold}
+                onChange={e => setThresholds({ ...thresholds, absence_alert_threshold: Number(e.target.value) })}
+                className='w-full px-4 py-3 rounded-xl text-sm outline-none' style={inputStyle} />
+            </div>
+            <div>
+              <label className='block text-xs font-medium mb-2' style={{ color: 'var(--text-muted)' }}>
+                Mark high severity above (%)
+              </label>
+              <input type='number' min={0} max={100} value={thresholds.absence_alert_severe_threshold}
+                onChange={e => setThresholds({ ...thresholds, absence_alert_severe_threshold: Number(e.target.value) })}
+                className='w-full px-4 py-3 rounded-xl text-sm outline-none' style={inputStyle} />
+            </div>
+          </div>
+
+          <button
+            onClick={() => saveThresholds.mutate(thresholds)}
+            disabled={saveThresholds.isPending}
+            className='pill-btn-primary mt-4 disabled:opacity-60'>
+            {saveThresholds.isPending ? 'Saving…' : 'Save thresholds'}
           </button>
         </div>
       )}

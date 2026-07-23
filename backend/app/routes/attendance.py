@@ -23,6 +23,11 @@ def check_attendance_alert(student_id, course_id):
     if len(records) < 5:
         return
 
+    course = Course.query.get(course_id)
+    institution = course.institution if course else None
+    threshold = institution.absence_alert_threshold if institution else 30
+    severe_threshold = institution.absence_alert_severe_threshold if institution else 50
+
     absences = len([r for r in records if r.status == 'absent'])
     absence_rate = (absences / len(records)) * 100
 
@@ -33,8 +38,8 @@ def check_attendance_alert(student_id, course_id):
         resolved=False
     ).first()
 
-    if absence_rate > 30 and not existing_alert:
-        severity = 'high' if absence_rate > 50 else 'medium'
+    if absence_rate > threshold and not existing_alert:
+        severity = 'high' if absence_rate > severe_threshold else 'medium'
         alert = Alert(
             student_id=student_id,
             course_id=course_id,
