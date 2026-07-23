@@ -10,7 +10,7 @@ auth_bp = Blueprint('auth', __name__)
 def register():
     data = request.get_json()
 
-    required_fields = ['first_name', 'last_name', 'email', 'password', 'role']
+    required_fields = ['first_name', 'last_name', 'email', 'password', 'role', 'join_code']
     for field in required_fields:
         if not data.get(field):
             return jsonify({'error': f'{field} is required'}), 400
@@ -26,16 +26,19 @@ def register():
     if User.query.filter_by(email=data['email']).first():
         return jsonify({'error': 'Email already exists'}), 409
 
-    institution_id = data.get('institution_id')
-    if institution_id is not None and not Institution.query.get(institution_id):
-        return jsonify({'error': 'Invalid institution_id'}), 400
+    # The institution is resolved server-side from the join code — never
+    # trust a client-supplied institution_id directly, or anyone could
+    # claim to belong to any school on the platform.
+    institution = Institution.query.filter_by(join_code=data['join_code'].strip().upper()).first()
+    if not institution:
+        return jsonify({'error': 'Invalid join code. Check with your institution for the correct code.'}), 400
 
     user = User(
         first_name=data['first_name'],
         last_name=data['last_name'],
         email=data['email'],
         role=data['role'],
-        institution_id=institution_id,
+        institution_id=institution.id,
         phone=data.get('phone')
     )
     user.set_password(data['password'])

@@ -62,6 +62,19 @@ export default function Institutions() {
             <h3 className='font-semibold' style={{ color: 'var(--text)' }}>{inst.name}</h3>
             <p className='text-sm mt-1' style={{ color: 'var(--text-muted)' }}>{inst.location || 'No location'}</p>
             <p className='text-sm mt-1' style={{ color: 'var(--text-muted)' }}>{inst.email}</p>
+            {inst.join_code && (
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(inst.join_code)
+                  toast.success('Join code copied!')
+                }}
+                className='flex items-center gap-2 mt-3 px-3 py-1.5 rounded-lg font-mono-data text-sm tracking-widest'
+                style={{ background: 'var(--dark)', border: '1px solid var(--border)', color: 'var(--text)' }}
+                title='Click to copy — share with students/parents to join this institution'
+              >
+                {inst.join_code}
+              </button>
+            )}
             <div className='mt-4'>
               <span className='px-3 py-1 rounded-full text-xs font-medium capitalize'
                 style={getStatusStyle(inst.subscription_status)}>
