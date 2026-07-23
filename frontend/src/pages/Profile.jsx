@@ -1,8 +1,17 @@
 import { useAuthStore } from '../store/authStore'
-import { User, Mail, Phone, Shield } from 'lucide-react'
+import { User, Mail, Phone, Shield, KeyRound } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import api from '../utils/api'
+import toast from 'react-hot-toast'
 
 export default function Profile() {
   const { user } = useAuthStore()
+
+  const { data: institution } = useQuery({
+    queryKey: ['institution', user?.institution_id],
+    queryFn: () => api.get(`/institutions/${user.institution_id}`).then(r => r.data.institution),
+    enabled: user?.role === 'institution_admin' && !!user?.institution_id
+  })
 
   return (
     <div className='flex flex-col gap-6 max-w-2xl'>
@@ -47,6 +56,31 @@ export default function Profile() {
           ))}
         </div>
       </div>
+
+      {user?.role === 'institution_admin' && institution?.join_code && (
+        <div className='rounded-2xl p-6' style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
+          <div className='flex items-center gap-3 mb-3'>
+            <div className='w-10 h-10 rounded-xl flex items-center justify-center'
+              style={{ background: 'color-mix(in srgb, var(--primary) 15%, transparent)' }}>
+              <KeyRound size={18} style={{ color: 'var(--primary)' }} />
+            </div>
+            <div>
+              <h3 className='font-semibold' style={{ color: 'var(--text)' }}>Institution join code</h3>
+              <p className='text-xs' style={{ color: 'var(--text-muted)' }}>Share this with students and parents so they can register under {institution.name}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(institution.join_code)
+              toast.success('Join code copied!')
+            }}
+            className='flex items-center gap-2 px-4 py-2 rounded-lg font-mono-data text-base tracking-widest'
+            style={{ background: 'var(--dark)', border: '1px solid var(--border)', color: 'var(--text)' }}
+          >
+            {institution.join_code}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

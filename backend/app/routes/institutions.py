@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
-from app.models.institution import Institution
+from app.models.institution import Institution, generate_join_code
 from app.models.user import User
 
 institutions_bp = Blueprint('institutions', __name__)
@@ -9,6 +9,11 @@ institutions_bp = Blueprint('institutions', __name__)
 def get_current_user():
     user_id = int(get_jwt_identity())
     return User.query.get(user_id)
+
+def can_see_join_code(current_user, institution_id):
+    if current_user.role == 'super_admin':
+        return True
+    return current_user.role == 'institution_admin' and current_user.institution_id == institution_id
 
 @institutions_bp.route('/', methods=['GET'])
 @jwt_required()
@@ -19,7 +24,7 @@ def get_institutions():
         return jsonify({'error': 'Unauthorized'}), 403
 
     institutions = Institution.query.all()
-    return jsonify({'institutions': [i.to_dict() for i in institutions]}), 200
+    return jsonify({'institutions': [i.to_dict(include_join_code=True) for i in institutions]}), 200
 
 @institutions_bp.route('/<int:institution_id>', methods=['GET'])
 @jwt_required()
@@ -30,7 +35,17 @@ def get_institution(institution_id):
         return jsonify({'error': 'Unauthorized'}), 403
 
     institution = Institution.query.get_or_404(institution_id)
-    return jsonify({'institution': institution.to_dict()}), 200
+    return jsonify({'institution': institution.to_dict(include_join_code=can_see_join_code(current_user, institution_id))}), 200
+
+@institutions_bp.route('/lookup/<string:code>', methods=['GET'])
+def lookup_institution_by_code(code):
+    """Public, unauthenticated: lets the registration form show 'Joining:
+    <School Name>' before the user submits, without exposing anything
+    beyond the name for a valid code."""
+    institution = Institution.query.filter_by(join_code=code.upper()).first()
+    if not institution:
+        return jsonify({'error': 'Invalid join code'}), 404
+    return jsonify({'institution': {'id': institution.id, 'name': institution.name}}), 200
 
 @institutions_bp.route('/', methods=['POST'])
 @jwt_required()
@@ -61,7 +76,26 @@ def create_institution():
     db.session.add(institution)
     db.session.commit()
 
-    return jsonify({'message': 'Institution created successfully', 'institution': institution.to_dict()}), 201
+    return jsonify({'message': 'Institution created successfully', 'institution': institution.to_dict(include_join_code=True)}), 201
+
+@institutions_bp.route('/<int:institution_id>/regenerate-code', methods=['POST'])
+@jwt_required()
+def regenerate_join_code(institution_id):
+    current_user = get_current_user()
+
+    if not can_see_join_code(current_user, institution_id):
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    institution = Institution.query.get_or_404(institution_id)
+
+    new_code = generate_join_code()
+    while Institution.query.filter_by(join_code=new_code).first():
+        new_code = generate_join_code()
+    institution.join_code = new_code
+
+    db.session.commit()
+
+    return jsonify({'message': 'Join code regenerated', 'join_code': institution.join_code}), 200
 
 @institutions_bp.route('/<int:institution_id>', methods=['PUT'])
 @jwt_required()

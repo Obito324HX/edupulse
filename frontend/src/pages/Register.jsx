@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react'
 import PulseLogo from '../components/PulseLogo'
 import ThemeToggle from '../components/ThemeToggle'
 import FloatingInput from '../components/FloatingInput'
@@ -11,12 +11,27 @@ import FloatingInput from '../components/FloatingInput'
 export default function Register() {
   const [form, setForm] = useState({
     first_name: '', last_name: '', email: '',
-    password: '', role: 'student', phone: ''
+    password: '', role: 'student', phone: '', join_code: ''
   })
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [institutionPreview, setInstitutionPreview] = useState(null) // { name } | 'invalid' | null
   const { login } = useAuthStore()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const code = form.join_code.trim()
+    if (code.length < 4) {
+      setInstitutionPreview(null)
+      return
+    }
+    const timeout = setTimeout(() => {
+      api.get(`/institutions/lookup/${code}`)
+        .then(res => setInstitutionPreview(res.data.institution))
+        .catch(() => setInstitutionPreview('invalid'))
+    }, 400)
+    return () => clearTimeout(timeout)
+  }, [form.join_code])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -86,6 +101,27 @@ export default function Register() {
               value={form.phone}
               onChange={e => setForm({ ...form, phone: e.target.value })}
             />
+            <div>
+              <FloatingInput
+                label='Institution join code'
+                value={form.join_code}
+                onChange={e => setForm({ ...form, join_code: e.target.value.toUpperCase() })}
+                required
+              />
+              {institutionPreview === 'invalid' && (
+                <p className='flex items-center gap-1.5 text-xs mt-2' style={{ color: 'var(--danger)' }}>
+                  <XCircle size={14} /> No institution found for that code
+                </p>
+              )}
+              {institutionPreview && institutionPreview !== 'invalid' && (
+                <p className='flex items-center gap-1.5 text-xs mt-2' style={{ color: 'var(--success)' }}>
+                  <CheckCircle2 size={14} /> Joining {institutionPreview.name}
+                </p>
+              )}
+              <p className='text-xs mt-2' style={{ color: 'var(--text-muted)' }}>
+                Get this code from your institution's administrator.
+              </p>
+            </div>
             <FloatingInput
               label='Role'
               as='select'
