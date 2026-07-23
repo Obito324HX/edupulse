@@ -19,6 +19,18 @@ function StatCard({ icon: Icon, label, value, color }) {
   )
 }
 
+function Reading({ label, value, icon: Icon, color }) {
+  return (
+    <div className='flex items-center gap-3 py-2.5' style={{ borderBottom: '1px solid var(--border)' }}>
+      <div className='w-9 h-9 rounded-lg flex items-center justify-center shrink-0' style={{ background: `color-mix(in srgb, ${color} 15%, transparent)` }}>
+        <Icon size={15} style={{ color }} />
+      </div>
+      <span className='text-[13px] flex-1' style={{ color: 'var(--text)' }}>{label}</span>
+      <span className='font-mono-data text-sm font-semibold' style={{ color: 'var(--text)' }}>{value}</span>
+    </div>
+  )
+}
+
 export default function Dashboard() {
   const { user } = useAuthStore()
 
@@ -77,7 +89,10 @@ export default function Dashboard() {
           super_admin sees the network-wide score across every institution */}
       {['institution_admin', 'super_admin'].includes(user?.role) && (
         <div className='rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-6'
-          style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
+          style={{
+            background: `radial-gradient(90% 130% at 0% 0%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 60%), var(--dark-secondary)`,
+            border: '1px solid var(--border)'
+          }}>
           <PulseRing
             value={pulse?.pulse ?? null}
             size={140}
@@ -85,45 +100,41 @@ export default function Dashboard() {
             label={user?.role === 'super_admin' ? 'Network pulse' : 'Institution pulse'}
             sub={pulse?.pulse != null ? (pulse.pulse >= 75 ? 'Healthy' : pulse.pulse >= 50 ? 'Watch closely' : 'Needs attention') : undefined}
           />
-          <div className='flex-1 flex flex-col gap-1 w-full'>
-            <p className='text-sm' style={{ color: 'var(--text-muted)' }}>
+          <div className='flex-1 flex flex-col w-full'>
+            <p className='text-xs mb-1' style={{ color: 'var(--text-muted)' }}>
               {pulse?.pulse != null
                 ? 'A composite of average grades, attendance, and open alerts.'
                 : 'Once grades and attendance start coming in, this fills in automatically.'}
             </p>
-            {pulse?.pulse != null && (
-              <div className='flex gap-6 mt-3 flex-wrap'>
-                <div>
-                  <p className='text-xs' style={{ color: 'var(--text-muted)' }}>Avg. grade</p>
-                  <p className='font-mono-data text-lg font-semibold' style={{ color: 'var(--text)' }}>{pulse.grade_average}%</p>
+            <div className='flex flex-col'>
+              <Reading label='Students' value={students?.length ?? 0} icon={Users} color='var(--secondary)' />
+              <Reading label='Courses' value={courses?.length ?? 0} icon={BookOpen} color='var(--primary)' />
+              <Reading label='Unread notifications' value={unreadCount} icon={Bell} color='var(--warning)' />
+              <div className='flex items-center gap-3 pt-2.5'>
+                <div className='w-9 h-9 rounded-lg flex items-center justify-center shrink-0' style={{ background: 'color-mix(in srgb, var(--danger) 15%, transparent)' }}>
+                  <AlertTriangle size={15} style={{ color: 'var(--danger)' }} />
                 </div>
-                <div>
-                  <p className='text-xs' style={{ color: 'var(--text-muted)' }}>Attendance</p>
-                  <p className='font-mono-data text-lg font-semibold' style={{ color: 'var(--text)' }}>{pulse.attendance_rate}%</p>
-                </div>
-                <div>
-                  <p className='text-xs' style={{ color: 'var(--text-muted)' }}>Open alerts</p>
-                  <p className='font-mono-data text-lg font-semibold' style={{ color: 'var(--danger)' }}>{pulse.unresolved_alerts}</p>
-                </div>
+                <span className='text-[13px] flex-1' style={{ color: 'var(--text)' }}>Open alerts</span>
+                <span className='font-mono-data text-sm font-semibold' style={{ color: 'var(--danger)' }}>{alertStats?.unresolved_alerts ?? 0}</span>
               </div>
-            )}
+            </div>
           </div>
         </div>
       )}
 
-      {/* Stats */}
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
-        {['institution_admin', 'super_admin', 'lecturer'].includes(user?.role) && (
-          <StatCard icon={Users} label='Total Students' value={students?.length || 0} color='var(--primary)' />
-        )}
-        <StatCard icon={BookOpen} label='Courses' value={courses?.length || 0} color='var(--secondary)' />
-        <StatCard icon={Bell} label='Unread Notifications' value={unreadCount} color='var(--warning)' />
-        {['institution_admin', 'super_admin'].includes(user?.role) && (
-          <>
-            <StatCard icon={AlertTriangle} label='Unresolved Alerts' value={alertStats?.unresolved_alerts || 0} color='var(--danger)' />
-          </>
-        )}
-      </div>
+      {/* Stats — non-admin roles (students, lecturers) don't get the pulse
+          hero above, so this is their only overview. Admin roles already
+          see Students/Courses/Alerts in the hero, so this stays limited to
+          what isn't duplicated there. */}
+      {!['institution_admin', 'super_admin'].includes(user?.role) && (
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+          {user?.role === 'lecturer' && (
+            <StatCard icon={Users} label='Total Students' value={students?.length || 0} color='var(--primary)' />
+          )}
+          <StatCard icon={BookOpen} label='Courses' value={courses?.length || 0} color='var(--secondary)' />
+          <StatCard icon={Bell} label='Unread Notifications' value={unreadCount} color='var(--warning)' />
+        </div>
+      )}
 
       {/* Charts and Alerts */}
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
