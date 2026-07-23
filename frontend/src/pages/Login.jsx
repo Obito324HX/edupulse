@@ -96,6 +96,12 @@ export default function Login() {
               }
             />
 
+            <div className='text-right -mt-2'>
+              <Link to='/forgot-password' style={{ color: 'var(--text-muted)' }} className='text-sm hover:underline'>
+                Forgot password?
+              </Link>
+            </div>
+
             <button type='submit' disabled={loading}
               className='pill-btn-primary w-full mt-2 disabled:opacity-60'>
               {loading ? 'Signing in…' : 'Sign in'}

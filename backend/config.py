@@ -9,6 +9,11 @@ class Config:
     MAIL_USE_TLS = True
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_USERNAME')
+    # Used to build the link inside password reset emails. Defaults to the
+    # live deployment so this works out of the box on Render; override
+    # locally if you're testing against a dev frontend.
+    FRONTEND_URL = os.environ.get('FRONTEND_URL') or 'https://edupulse-one.vercel.app'
 
 class DevelopmentConfig(Config):
     DEBUG = True

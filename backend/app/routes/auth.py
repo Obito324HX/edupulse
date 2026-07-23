@@ -1,10 +1,18 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from app import db
+from flask_mail import Message
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
+from app import db, mail
 from app.models.user import User
 from app.models.institution import Institution
 
 auth_bp = Blueprint('auth', __name__)
+
+RESET_TOKEN_SALT = 'password-reset'
+RESET_TOKEN_MAX_AGE_SECONDS = 3600  # 1 hour
+
+def _reset_serializer():
+    return URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
@@ -102,3 +110,74 @@ def change_password():
     db.session.commit()
 
     return jsonify({'message': 'Password changed successfully'}), 200
+
+@auth_bp.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    data = request.get_json()
+    email = (data or {}).get('email', '').strip().lower()
+
+    # Always return the same generic response whether or not the email
+    # exists, so this endpoint can't be used to check which emails are
+    # registered on the platform.
+    generic_response = jsonify({
+        'message': 'If an account with that email exists, a password reset link has been sent.'
+    }), 200
+
+    if not email:
+        return generic_response
+
+    user = User.query.filter(db.func.lower(User.email) == email).first()
+    if not user or not user.is_active:
+        return generic_response
+
+    token = _reset_serializer().dumps(user.id, salt=RESET_TOKEN_SALT)
+    reset_link = f"{current_app.config['FRONTEND_URL']}/reset-password?token={token}"
+
+    try:
+        msg = Message(
+            subject='Reset your EduPulse password',
+            recipients=[user.email],
+            body=(
+                f"Hi {user.first_name},\n\n"
+                f"We received a request to reset your EduPulse password. "
+                f"Click the link below to choose a new one — it expires in 1 hour:\n\n"
+                f"{reset_link}\n\n"
+                f"If you didn't request this, you can safely ignore this email."
+            )
+        )
+        mail.send(msg)
+    except Exception:
+        # Don't leak SMTP/config errors to the client, and don't let a mail
+        # failure reveal whether the account exists either — log it
+        # server-side so it shows up in Render's logs for debugging.
+        current_app.logger.exception('Failed to send password reset email')
+
+    return generic_response
+
+@auth_bp.route('/reset-password', methods=['POST'])
+def reset_password():
+    data = request.get_json()
+    token = (data or {}).get('token')
+    new_password = (data or {}).get('new_password')
+
+    if not token or not new_password:
+        return jsonify({'error': 'Token and new_password are required'}), 400
+
+    if len(new_password) < 8:
+        return jsonify({'error': 'Password must be at least 8 characters'}), 400
+
+    try:
+        user_id = _reset_serializer().loads(token, salt=RESET_TOKEN_SALT, max_age=RESET_TOKEN_MAX_AGE_SECONDS)
+    except SignatureExpired:
+        return jsonify({'error': 'This reset link has expired. Request a new one.'}), 400
+    except BadSignature:
+        return jsonify({'error': 'This reset link is invalid.'}), 400
+
+    user = User.query.get(user_id)
+    if not user or not user.is_active:
+        return jsonify({'error': 'This reset link is invalid.'}), 400
+
+    user.set_password(new_password)
+    db.session.commit()
+
+    return jsonify({'message': 'Password reset successfully. You can now log in.'}), 200

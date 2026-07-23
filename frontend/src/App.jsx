@@ -7,6 +7,8 @@ import { useThemeStore } from './store/themeStore'
 
 import Login from './pages/Login'
 import Register from './pages/Register'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import Dashboard from './pages/Dashboard'
 import Students from './pages/Students'
 import Courses from './pages/Courses'
@@ -42,6 +44,8 @@ export default function App() {
         <Routes>
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
+          <Route path='/forgot-password' element={<ForgotPassword />} />
+          <Route path='/reset-password' element={<ResetPassword />} />
           <Route path='/' element={<Navigate to='/dashboard' />} />
           <Route path='/' element={
             <ProtectedRoute>
