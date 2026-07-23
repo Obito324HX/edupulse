@@ -5,6 +5,7 @@ import api from '../utils/api'
 import toast from 'react-hot-toast'
 import { Eye, EyeOff } from 'lucide-react'
 import PulseLogo from '../components/PulseLogo'
+import PulseECG from '../components/PulseECG'
 import ThemeToggle from '../components/ThemeToggle'
 import FloatingInput from '../components/FloatingInput'
 
@@ -44,6 +45,9 @@ export default function Login() {
         <div className='text-center mb-8'>
           <div className='mx-auto mb-5 w-fit'>
             <PulseLogo size={56} />
+          </div>
+          <div className='flex justify-center mb-3'>
+            <PulseECG w={88} h={18} />
           </div>
           <div className='inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium mb-5'
             style={{

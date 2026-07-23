@@ -3,6 +3,9 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models.institution import Institution, generate_join_code
 from app.models.user import User
+from app.models.course import Course
+from app.models.grade import Grade, Attendance
+from app.models.alert import Alert
 
 institutions_bp = Blueprint('institutions', __name__)
 
@@ -14,6 +17,59 @@ def can_see_join_code(current_user, institution_id):
     if current_user.role == 'super_admin':
         return True
     return current_user.role == 'institution_admin' and current_user.institution_id == institution_id
+
+def _compute_pulse(institution_id=None):
+    """A single 0-100 'pulse' score: half attendance rate, half average
+    grade, minus a penalty for unresolved alerts (5 points each, capped
+    at 40). institution_id=None scopes across every institution, for
+    super_admin's network-wide view.
+    """
+    grade_q = Grade.query
+    attendance_q = Attendance.query
+    alert_q = Alert.query.filter_by(resolved=False)
+
+    if institution_id is not None:
+        grade_q = grade_q.join(Course, Grade.course_id == Course.id).filter(Course.institution_id == institution_id)
+        attendance_q = attendance_q.join(Course, Attendance.course_id == Course.id).filter(Course.institution_id == institution_id)
+        alert_q = alert_q.join(User, Alert.student_id == User.id).filter(User.institution_id == institution_id)
+
+    grades = grade_q.all()
+    attendance_records = attendance_q.all()
+    unresolved_alerts = alert_q.count()
+
+    grade_average = round(sum(g.percentage() for g in grades) / len(grades), 1) if grades else None
+    present = len([a for a in attendance_records if a.status == 'present'])
+    attendance_rate = round((present / len(attendance_records)) * 100, 1) if attendance_records else None
+
+    # If there's genuinely no data yet (a brand new institution), don't
+    # pretend to have a score -- let the frontend show an empty state
+    # instead of a misleading 0 or 100.
+    if grade_average is None and attendance_rate is None:
+        return {'pulse': None, 'grade_average': None, 'attendance_rate': None, 'unresolved_alerts': unresolved_alerts}
+
+    components = [c for c in [grade_average, attendance_rate] if c is not None]
+    base = sum(components) / len(components)
+    penalty = min(unresolved_alerts * 5, 40)
+    pulse = max(0, min(100, round(base - penalty)))
+
+    return {
+        'pulse': pulse,
+        'grade_average': grade_average,
+        'attendance_rate': attendance_rate,
+        'unresolved_alerts': unresolved_alerts
+    }
+
+@institutions_bp.route('/pulse', methods=['GET'])
+@jwt_required()
+def get_pulse():
+    current_user = get_current_user()
+    if current_user.role not in ['institution_admin', 'super_admin']:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    # super_admin has no institution_id -- that's what makes this the
+    # network-wide score instead of a single school's.
+    scope_id = None if current_user.role == 'super_admin' else current_user.institution_id
+    return jsonify(_compute_pulse(scope_id)), 200
 
 @institutions_bp.route('/', methods=['GET'])
 @jwt_required()

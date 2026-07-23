@@ -155,3 +155,30 @@ h1, h2, h3, h4, h5, h6 {
   background-size: 200% 100%;
   animation: pulse-sweep 3.5s linear infinite;
 }
+
+/* PulseRing's slow, deliberate heartbeat -- not a constant loop, just
+   enough to read as "live" without nagging */
+@keyframes pulse-beat {
+  0%, 100% { transform: scale(1); }
+  22% { transform: scale(1.045); }
+  40% { transform: scale(1); }
+  55% { transform: scale(1.02); }
+  70% { transform: scale(1); }
+}
+.pulse-ring-beat {
+  animation: pulse-beat 4.2s ease-in-out infinite;
+}
+
+/* ECG waveform draw-in, used once on the login screen */
+@keyframes ecg-draw {
+  to { stroke-dashoffset: 0; }
+}
+.ecg-draw {
+  animation: ecg-draw 1.6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-ring-beat, .ecg-draw, .pulse-divider {
+    animation: none !important;
+  }
+}
