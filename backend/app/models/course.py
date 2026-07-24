@@ -45,8 +45,11 @@ class Course(db.Model):
             'name': self.name,
             'code': self.code,
             'department_id': self.department_id,
+            'department_name': self.department.name if self.department else None,
             'institution_id': self.institution_id,
             'lecturer_id': self.lecturer_id,
+            'lecturer_name': f'{self.lecturer.first_name} {self.lecturer.last_name}' if self.lecturer else None,
+            'enrolled_count': len(self.enrollments),
             'semester': self.semester,
             'year': self.year,
             'created_at': self.created_at.isoformat()
