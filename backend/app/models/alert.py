@@ -21,7 +21,9 @@ class Alert(db.Model):
         return {
             'id': self.id,
             'student_id': self.student_id,
+            'student_name': f'{self.student.first_name} {self.student.last_name}' if self.student else None,
             'course_id': self.course_id,
+            'course_name': self.course.name if self.course else None,
             'alert_type': self.alert_type,
             'message': self.message,
             'severity': self.severity,
