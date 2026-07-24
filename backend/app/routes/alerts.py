@@ -18,7 +18,11 @@ def get_alerts():
 
     if current_user.role == 'student':
         alerts = Alert.query.filter_by(student_id=current_user.id).all()
-    elif current_user.role in ['lecturer', 'institution_admin', 'super_admin']:
+    elif current_user.role == 'super_admin':
+        # super_admin has no institution_id of its own -- that's what makes
+        # this the network-wide view instead of one school's.
+        alerts = Alert.query.all()
+    elif current_user.role in ['lecturer', 'institution_admin']:
         alerts = Alert.query.join(User, Alert.student_id == User.id).filter(
             User.institution_id == current_user.institution_id
         ).all()
@@ -85,20 +89,15 @@ def get_alert_stats():
     if current_user.role not in ['institution_admin', 'super_admin']:
         return jsonify({'error': 'Unauthorized'}), 403
 
-    total_alerts = Alert.query.join(User, Alert.student_id == User.id).filter(
-        User.institution_id == current_user.institution_id
-    ).count()
+    alert_q = Alert.query
+    if current_user.role != 'super_admin':
+        alert_q = alert_q.join(User, Alert.student_id == User.id).filter(
+            User.institution_id == current_user.institution_id
+        )
 
-    unresolved_alerts = Alert.query.join(User, Alert.student_id == User.id).filter(
-        User.institution_id == current_user.institution_id,
-        Alert.resolved == False
-    ).count()
-
-    high_severity = Alert.query.join(User, Alert.student_id == User.id).filter(
-        User.institution_id == current_user.institution_id,
-        Alert.severity == 'high',
-        Alert.resolved == False
-    ).count()
+    total_alerts = alert_q.count()
+    unresolved_alerts = alert_q.filter(Alert.resolved == False).count()
+    high_severity = alert_q.filter(Alert.severity == 'high', Alert.resolved == False).count()
 
     return jsonify({
         'stats': {

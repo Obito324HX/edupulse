@@ -5,6 +5,8 @@ import {
   ClipboardList, Bell, User, LogOut, Building2, Menu, X, MoreHorizontal
 } from 'lucide-react'
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import api from '../utils/api'
 import PulseLogo from './PulseLogo'
 import ThemeToggle from './ThemeToggle'
 
@@ -15,6 +17,16 @@ export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   // Mobile: the bottom nav's "More" sheet, for anything past the 3 primary tabs.
   const [moreOpen, setMoreOpen] = useState(false)
+
+  // Unresolved alert count for the nav badge. Only institution_admin and
+  // super_admin get a stats endpoint at all -- students/lecturers just see
+  // the Alerts page itself, no badge.
+  const { data: alertStats } = useQuery({
+    queryKey: ['alertStats'],
+    queryFn: () => api.get('/alerts/stats').then(r => r.data.stats),
+    enabled: ['institution_admin', 'super_admin'].includes(user?.role)
+  })
+  const alertBadge = alertStats?.unresolved_alerts || 0
 
   const handleLogout = () => {
     logout()
@@ -61,7 +73,13 @@ export default function Layout() {
                 style={{ width: 3, background: isActive ? 'var(--primary)' : 'transparent' }}
               />
               <Icon size={20} className='shrink-0' />
-              {showLabels && <span className='text-sm font-medium'>{label}</span>}
+              {showLabels && <span className='text-sm font-medium flex-1'>{label}</span>}
+              {to === '/alerts' && alertBadge > 0 && (
+                <span className='font-mono-data text-[10px] font-bold rounded-full flex items-center justify-center shrink-0'
+                  style={{ minWidth: 16, height: 16, padding: '0 4px', background: 'var(--danger)', color: '#fff' }}>
+                  {alertBadge > 99 ? '99+' : alertBadge}
+                </span>
+              )}
             </>
           )}
         </NavLink>
@@ -188,7 +206,12 @@ export default function Layout() {
               className='flex flex-col items-center gap-1 px-3 py-1'>
               {({ isActive }) => (
                 <>
-                  <Icon size={20} strokeWidth={isActive ? 2.4 : 1.8} style={{ color: isActive ? 'var(--primary)' : 'var(--text-muted)' }} />
+                  <span className='relative'>
+                    <Icon size={20} strokeWidth={isActive ? 2.4 : 1.8} style={{ color: isActive ? 'var(--primary)' : 'var(--text-muted)' }} />
+                    {to === '/alerts' && alertBadge > 0 && (
+                      <span className='absolute -top-1 -right-1.5 rounded-full' style={{ width: 7, height: 7, background: 'var(--danger)', border: '1.5px solid var(--dark-secondary)' }} />
+                    )}
+                  </span>
                   <span className='text-[10px]' style={{ color: isActive ? 'var(--primary)' : 'var(--text-muted)', fontWeight: isActive ? 600 : 500 }}>{label}</span>
                 </>
               )}
