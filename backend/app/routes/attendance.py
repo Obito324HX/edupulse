@@ -155,8 +155,10 @@ def get_course_attendance_summary(course_id):
     result = []
     for student_id, counts in summary.items():
         attendance_rate = (counts['present'] / counts['total']) * 100 if counts['total'] > 0 else 0
+        student = User.query.get(student_id)
         result.append({
             'student_id': student_id,
+            'student_name': f'{student.first_name} {student.last_name}' if student else None,
             'present': counts['present'],
             'absent': counts['absent'],
             'late': counts['late'],
