@@ -32,49 +32,79 @@ export default function Login() {
   }
 
   return (
-    <div className='min-h-screen flex items-center justify-center p-4 sm:p-6 relative'
-      style={{ background: 'var(--dark)' }}>
+    <div className='min-h-screen flex flex-col lg:flex-row relative' style={{ background: 'var(--dark)' }}>
 
-      <div className='absolute top-5 right-5'>
+      <div className='absolute top-5 right-5 z-10'>
         <ThemeToggle variant='icon' />
       </div>
 
-      <div className='w-full max-w-md'>
-
-        {/* Brand mark */}
-        <div className='text-center mb-8'>
-          <div className='mx-auto mb-5 w-fit'>
-            <PulseLogo size={56} />
-          </div>
-          <div className='flex justify-center mb-3'>
-            <PulseECG w={88} h={18} />
-          </div>
-          <div className='inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium mb-5'
-            style={{
-              background: 'color-mix(in srgb, var(--success) 12%, transparent)',
-              border: '1px solid color-mix(in srgb, var(--success) 25%, transparent)',
-              color: 'var(--success)'
-            }}>
-            <span className='w-1.5 h-1.5 rounded-full' style={{ background: 'var(--success)' }} />
-            Academic pulse, tracked live
-          </div>
-          <h1 className='text-4xl font-semibold' style={{ color: 'var(--text)' }}>
+      {/* Brand panel -- desktop only. On mobile this collapses away entirely
+          and the form panel below becomes the whole screen, same as before. */}
+      <div className='hidden lg:flex lg:w-[46%] flex-col justify-between p-14 relative overflow-hidden'
+        style={{
+          background: `radial-gradient(70% 55% at 15% 8%, color-mix(in srgb, var(--secondary) 24%, transparent), transparent 60%), radial-gradient(60% 50% at 90% 95%, color-mix(in srgb, var(--primary) 20%, transparent), transparent 60%), var(--dark)`
+        }}>
+        <div className='flex items-center gap-2 relative z-10'>
+          <PulseLogo size={30} />
+          <span className='font-semibold' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>
             Edu<span className='text-accent'>Pulse</span>
+          </span>
+        </div>
+
+        <div className='relative z-10 max-w-md'>
+          <div className='mb-4'>
+            <PulseECG w={80} h={16} />
+          </div>
+          <h1 className='font-semibold leading-tight mb-4' style={{ color: 'var(--text)', fontSize: '2.5rem', fontFamily: "'Fraunces', serif" }}>
+            Every student's progress, finally in one place.
           </h1>
-          <p className='mt-2 text-sm' style={{ color: 'var(--text-muted)' }}>
-            Keep your students' academic heartbeat strong
+          <p className='text-sm leading-relaxed' style={{ color: 'var(--text-muted)', maxWidth: 360 }}>
+            Attendance, grades, and alerts across every institution you run — without chasing five spreadsheets to find who needs help.
           </p>
         </div>
 
-        {/* Card */}
-        <div className='rounded-3xl p-8 shadow-2xl'
-          style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
-          <h2 className='text-xl font-semibold mb-1' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>
-            Welcome back
-          </h2>
-          <p className='text-sm mb-6' style={{ color: 'var(--text-muted)' }}>
-            Please sign in to continue to your account
-          </p>
+        <div className='relative z-10 text-xs' style={{ color: 'var(--text-muted)' }}>
+          © {new Date().getFullYear()} EduPulse
+        </div>
+      </div>
+
+      {/* Form panel */}
+      <div className='flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-12'>
+        <div className='w-full max-w-md'>
+
+          {/* Brand mark -- mobile only, since the brand panel above covers this on desktop */}
+          <div className='lg:hidden text-center mb-8'>
+            <div className='mx-auto mb-5 w-fit'>
+              <PulseLogo size={56} />
+            </div>
+            <div className='flex justify-center mb-3'>
+              <PulseECG w={88} h={18} />
+            </div>
+            <div className='inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium mb-5'
+              style={{
+                background: 'color-mix(in srgb, var(--success) 12%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--success) 25%, transparent)',
+                color: 'var(--success)'
+              }}>
+              <span className='w-1.5 h-1.5 rounded-full' style={{ background: 'var(--success)' }} />
+              Academic pulse, tracked live
+            </div>
+            <h1 className='text-4xl font-semibold' style={{ color: 'var(--text)' }}>
+              Edu<span className='text-accent'>Pulse</span>
+            </h1>
+            <p className='mt-2 text-sm' style={{ color: 'var(--text-muted)' }}>
+              Keep your students' academic heartbeat strong
+            </p>
+          </div>
+
+          <div className='mb-6'>
+            <h2 className='text-2xl font-semibold mb-1' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>
+              Welcome back
+            </h2>
+            <p className='text-sm' style={{ color: 'var(--text-muted)' }}>
+              Sign in to your institution's account
+            </p>
+          </div>
 
           <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
             <FloatingInput
@@ -112,12 +142,15 @@ export default function Login() {
             </button>
           </form>
 
-          <p className='text-center text-sm mt-6' style={{ color: 'var(--text-muted)' }}>
-            Don't have an account?{' '}
-            <Link to='/register' style={{ color: 'var(--primary)' }} className='font-medium hover:underline'>
-              Register
+          <div className='flex items-center justify-between gap-3 mt-6 px-4 py-3 rounded-xl'
+            style={{ background: 'color-mix(in srgb, var(--secondary) 12%, transparent)', border: '1px solid color-mix(in srgb, var(--secondary) 25%, transparent)' }}>
+            <p className='text-xs' style={{ color: 'var(--text)' }}>
+              New institution? <span className='font-medium'>Register with a join code</span>
+            </p>
+            <Link to='/register' style={{ color: 'var(--secondary)' }} className='text-xs font-semibold whitespace-nowrap'>
+              Get started →
             </Link>
-          </p>
+          </div>
         </div>
       </div>
     </div>
