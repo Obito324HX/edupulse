@@ -23,6 +23,7 @@ class Grade(db.Model):
         return {
             'id': self.id,
             'student_id': self.student_id,
+            'student_name': f'{self.student.first_name} {self.student.last_name}' if self.student else None,
             'course_id': self.course_id,
             'assignment_name': self.assignment_name,
             'score': self.score,

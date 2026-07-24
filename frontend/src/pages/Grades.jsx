@@ -50,6 +50,12 @@ export default function Grades() {
     return 'var(--danger)'
   }
 
+  const classStats = canEnter && grades?.length > 0 ? {
+    average: grades.reduce((sum, g) => sum + g.percentage, 0) / grades.length,
+    highest: Math.max(...grades.map(g => g.percentage)),
+    lowest: Math.min(...grades.map(g => g.percentage)),
+  } : null
+
   const inputStyle = { background: 'var(--dark)', border: '1px solid var(--border)', color: 'var(--text)' }
 
   return (
@@ -82,11 +88,30 @@ export default function Grades() {
         </select>
       )}
 
+      {/* Class summary -- only meaningful once a course with grades is selected */}
+      {classStats && (
+        <div className='flex flex-wrap gap-4'>
+          <div className='rounded-xl px-4 py-3 flex-1 min-w-[120px]' style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
+            <p className='text-xs' style={{ color: 'var(--text-muted)' }}>Class average</p>
+            <p className='font-mono-data text-lg font-semibold' style={{ color: getColor(classStats.average) }}>{classStats.average.toFixed(1)}%</p>
+          </div>
+          <div className='rounded-xl px-4 py-3 flex-1 min-w-[120px]' style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
+            <p className='text-xs' style={{ color: 'var(--text-muted)' }}>Highest</p>
+            <p className='font-mono-data text-lg font-semibold' style={{ color: 'var(--success)' }}>{classStats.highest.toFixed(1)}%</p>
+          </div>
+          <div className='rounded-xl px-4 py-3 flex-1 min-w-[120px]' style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
+            <p className='text-xs' style={{ color: 'var(--text-muted)' }}>Lowest</p>
+            <p className='font-mono-data text-lg font-semibold' style={{ color: 'var(--danger)' }}>{classStats.lowest.toFixed(1)}%</p>
+          </div>
+        </div>
+      )}
+
       <div className='rounded-2xl overflow-hidden' style={{ border: '1px solid var(--border)' }}>
         <div className='overflow-x-auto'>
         <table className='w-full'>
           <thead>
             <tr style={{ background: 'var(--dark-secondary)' }}>
+              {canEnter && <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Student</th>}
               <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Assignment</th>
               <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Type</th>
               <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Score</th>
@@ -96,11 +121,16 @@ export default function Grades() {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={5} className='text-center py-8' style={{ color: 'var(--text-muted)' }}>Loading...</td></tr>
+              <tr><td colSpan={canEnter ? 6 : 5} className='text-center py-8' style={{ color: 'var(--text-muted)' }}>Loading...</td></tr>
             ) : !grades || grades.length === 0 ? (
-              <tr><td colSpan={5} className='text-center py-8' style={{ color: 'var(--text-muted)' }}>No grades yet</td></tr>
+              <tr><td colSpan={canEnter ? 6 : 5} className='text-center py-8' style={{ color: 'var(--text-muted)' }}>No grades yet</td></tr>
             ) : grades?.map((grade, i) => (
               <tr key={grade.id} style={{ borderTop: '1px solid var(--border)', background: i % 2 === 0 ? 'var(--dark)' : 'var(--dark-secondary)' }}>
+                {canEnter && (
+                  <td className='px-6 py-4 text-sm font-medium' style={{ color: 'var(--text)' }}>
+                    {grade.student_name || '—'}
+                  </td>
+                )}
                 <td className='px-6 py-4 text-sm font-medium' style={{ color: 'var(--text)' }}>{grade.assignment_name}</td>
                 <td className='px-6 py-4'>
                   <span className='px-2 py-1 rounded-lg text-xs capitalize'
