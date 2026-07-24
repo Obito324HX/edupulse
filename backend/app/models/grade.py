@@ -50,6 +50,8 @@ class Attendance(db.Model):
             'id': self.id,
             'student_id': self.student_id,
             'course_id': self.course_id,
+            'course_name': self.course.name if self.course else None,
+            'course_code': self.course.code if self.course else None,
             'date': self.date.isoformat(),
             'status': self.status,
             'marked_by': self.marked_by,
