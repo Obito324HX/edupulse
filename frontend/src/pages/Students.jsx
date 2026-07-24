@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../utils/api'
-import { Users, Search, UserPlus, X, ShieldPlus } from 'lucide-react'
+import { Users, Search, UserPlus, X, ShieldPlus, AlertTriangle } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useAuthStore } from '../store/authStore'
@@ -8,6 +8,7 @@ import { useAuthStore } from '../store/authStore'
 export default function Students() {
   const { user } = useAuthStore()
   const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
   const [showEnrollModal, setShowEnrollModal] = useState(false)
   const [showStaffModal, setShowStaffModal] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState(null)
@@ -19,6 +20,16 @@ export default function Students() {
     queryKey: ['students'],
     queryFn: () => api.get('/users/students').then(r => r.data.students)
   })
+
+  // Only staff roles get an alerts list to flag students against --
+  // a student viewing their own roster (if that ever happens) wouldn't
+  // have this endpoint available anyway.
+  const { data: alerts } = useQuery({
+    queryKey: ['alerts'],
+    queryFn: () => api.get('/alerts/').then(r => r.data.alerts),
+    enabled: ['institution_admin', 'super_admin', 'lecturer'].includes(user?.role)
+  })
+  const flaggedIds = new Set((alerts || []).filter(a => !a.resolved).map(a => a.student_id))
 
   const { data: courses } = useQuery({
     queryKey: ['courses'],
@@ -53,9 +64,16 @@ export default function Students() {
     onError: (err) => toast.error(err.response?.data?.error || 'Failed to create staff account')
   })
 
-  const filtered = data?.filter(s =>
-    `${s.first_name} ${s.last_name} ${s.email}`.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = data?.filter(s => {
+    const matchesSearch = `${s.first_name} ${s.last_name} ${s.email}`.toLowerCase().includes(search.toLowerCase())
+    const matchesStatus =
+      statusFilter === 'all' ? true :
+      statusFilter === 'active' ? s.is_active :
+      statusFilter === 'flagged' ? flaggedIds.has(s.id) : true
+    return matchesSearch && matchesStatus
+  })
+
+  const flaggedCount = data?.filter(s => flaggedIds.has(s.id)).length || 0
 
   const inputStyle = { background: 'var(--dark)', border: '1px solid var(--border)', color: 'var(--text)' }
 
@@ -84,6 +102,27 @@ export default function Students() {
           style={{ color: 'var(--text)' }} />
       </div>
 
+      {/* Filter chips */}
+      <div className='flex items-center gap-2'>
+        {[
+          { id: 'all', label: 'All', count: data?.length || 0 },
+          { id: 'active', label: 'Active', count: data?.filter(s => s.is_active).length || 0 },
+          { id: 'flagged', label: 'Flagged', count: flaggedCount },
+        ].map(chip => (
+          <button key={chip.id} onClick={() => setStatusFilter(chip.id)}
+            className='flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors'
+            style={{
+              background: statusFilter === chip.id
+                ? (chip.id === 'flagged' ? 'var(--danger)' : 'var(--primary)')
+                : 'var(--dark-secondary)',
+              color: statusFilter === chip.id ? 'var(--on-primary)' : 'var(--text-muted)',
+              border: `1px solid ${statusFilter === chip.id ? 'transparent' : 'var(--border)'}`
+            }}>
+            {chip.label} <span className='font-mono-data'>{chip.count}</span>
+          </button>
+        ))}
+      </div>
+
       {/* Table */}
       <div className='rounded-2xl overflow-hidden' style={{ border: '1px solid var(--border)' }}>
         <div className='overflow-x-auto'>
@@ -101,18 +140,26 @@ export default function Students() {
             {isLoading ? (
               <tr><td colSpan={5} className='text-center py-8' style={{ color: 'var(--text-muted)' }}>Loading...</td></tr>
             ) : filtered?.length === 0 ? (
-              <tr><td colSpan={5} className='text-center py-8' style={{ color: 'var(--text-muted)' }}>No students found</td></tr>
+              <tr><td colSpan={5} className='text-center py-8' style={{ color: 'var(--text-muted)' }}>
+                {statusFilter !== 'all' || search ? 'No students match this filter' : 'No students found'}
+              </td></tr>
             ) : filtered?.map((student, i) => (
               <tr key={student.id} style={{ borderTop: '1px solid var(--border)', background: i % 2 === 0 ? 'var(--dark)' : 'var(--dark-secondary)' }}>
                 <td className='px-6 py-4'>
                   <div className='flex items-center gap-3'>
-                    <div className='w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold text-on-primary'
+                    <div className='w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold text-on-primary shrink-0'
                       style={{ background: 'var(--primary)' }}>
                       {student.first_name[0]}{student.last_name[0]}
                     </div>
                     <span className='text-sm font-medium' style={{ color: 'var(--text)' }}>
                       {student.first_name} {student.last_name}
                     </span>
+                    {flaggedIds.has(student.id) && (
+                      <span title='Has an unresolved alert' className='flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0'
+                        style={{ background: 'color-mix(in srgb, var(--danger) 15%, transparent)', color: 'var(--danger)' }}>
+                        <AlertTriangle size={10} /> Flagged
+                      </span>
+                    )}
                   </div>
                 </td>
                 <td className='px-6 py-4 text-sm' style={{ color: 'var(--text-muted)' }}>{student.email}</td>
