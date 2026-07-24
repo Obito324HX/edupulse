@@ -1,12 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../utils/api'
-import { BookOpen, Plus, X } from 'lucide-react'
+import { BookOpen, Plus, X, Search, GraduationCap, Users2 } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useAuthStore } from '../store/authStore'
 
 export default function Courses() {
   const { user } = useAuthStore()
+  const [search, setSearch] = useState('')
+  const [deptFilter, setDeptFilter] = useState('all')
   const [showCourseModal, setShowCourseModal] = useState(false)
   const [showDeptModal, setShowDeptModal] = useState(false)
   const [courseForm, setCourseForm] = useState({ name: '', code: '', department_id: '', semester: '', year: '' })
@@ -48,6 +50,12 @@ export default function Courses() {
   const inputStyle = { background: 'var(--dark)', border: '1px solid var(--border)', color: 'var(--text)' }
   const canManage = ['super_admin', 'institution_admin'].includes(user?.role)
 
+  const filtered = courses?.filter(c => {
+    const matchesSearch = `${c.name} ${c.code}`.toLowerCase().includes(search.toLowerCase())
+    const matchesDept = deptFilter === 'all' || c.department_id === Number(deptFilter)
+    return matchesSearch && matchesDept
+  })
+
   return (
     <div className='flex flex-col gap-6'>
       <div className='flex items-center justify-between flex-wrap gap-3'>
@@ -71,33 +79,92 @@ export default function Courses() {
         )}
       </div>
 
+      {/* Search */}
+      <div className='flex items-center gap-3 px-4 py-3 rounded-xl'
+        style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
+        <Search size={18} style={{ color: 'var(--text-muted)' }} />
+        <input value={search} onChange={e => setSearch(e.target.value)}
+          placeholder='Search courses...'
+          className='flex-1 bg-transparent outline-none text-sm'
+          style={{ color: 'var(--text)' }} />
+      </div>
+
+      {/* Department chips */}
+      {departments?.length > 0 && (
+        <div className='flex items-center gap-2 flex-wrap'>
+          <button onClick={() => setDeptFilter('all')}
+            className='px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors'
+            style={{
+              background: deptFilter === 'all' ? 'var(--primary)' : 'var(--dark-secondary)',
+              color: deptFilter === 'all' ? 'var(--on-primary)' : 'var(--text-muted)',
+              border: `1px solid ${deptFilter === 'all' ? 'transparent' : 'var(--border)'}`
+            }}>
+            All departments
+          </button>
+          {departments.map(d => (
+            <button key={d.id} onClick={() => setDeptFilter(String(d.id))}
+              className='px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors'
+              style={{
+                background: deptFilter === String(d.id) ? 'var(--primary)' : 'var(--dark-secondary)',
+                color: deptFilter === String(d.id) ? 'var(--on-primary)' : 'var(--text-muted)',
+                border: `1px solid ${deptFilter === String(d.id) ? 'transparent' : 'var(--border)'}`
+              }}>
+              {d.name}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
         {isLoading ? (
           <p style={{ color: 'var(--text-muted)' }}>Loading...</p>
-        ) : courses?.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)' }}>No courses found</p>
-        ) : courses?.map(course => (
-          <div key={course.id} className='rounded-2xl p-6'
+        ) : filtered?.length === 0 ? (
+          <p style={{ color: 'var(--text-muted)' }}>
+            {search || deptFilter !== 'all' ? 'No courses match this filter' : 'No courses found'}
+          </p>
+        ) : filtered?.map(course => (
+          <div key={course.id} className='rounded-2xl p-6 flex flex-col'
             style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
-            <div className='w-10 h-10 rounded-xl flex items-center justify-center mb-4'
-              style={{ background: 'color-mix(in srgb, var(--primary) 15%, transparent)' }}>
-              <BookOpen size={20} style={{ color: 'var(--primary)' }} />
+            <div className='flex items-start justify-between mb-4'>
+              <div className='w-10 h-10 rounded-xl flex items-center justify-center'
+                style={{ background: 'color-mix(in srgb, var(--primary) 15%, transparent)' }}>
+                <BookOpen size={20} style={{ color: 'var(--primary)' }} />
+              </div>
+              {course.department_name && (
+                <span className='px-2.5 py-1 rounded-lg text-[11px] font-medium'
+                  style={{ background: 'var(--dark)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+                  {course.department_name}
+                </span>
+              )}
             </div>
             <h3 className='font-semibold' style={{ color: 'var(--text)' }}>{course.name}</h3>
             <p className='text-sm mt-1' style={{ color: 'var(--text-muted)' }}>{course.code}</p>
-            <div className='flex gap-2 mt-4'>
-              {course.semester && (
-                <span className='px-2 py-1 rounded-lg text-xs'
-                  style={{ background: 'color-mix(in srgb, var(--primary) 15%, transparent)', color: 'var(--primary)' }}>
-                  {course.semester}
-                </span>
-              )}
-              {course.year && (
-                <span className='px-2 py-1 rounded-lg text-xs'
-                  style={{ background: 'color-mix(in srgb, var(--secondary) 15%, transparent)', color: 'var(--secondary)' }}>
-                  {course.year}
-                </span>
-              )}
+
+            <div className='flex items-center gap-4 mt-4 pt-4' style={{ borderTop: '1px solid var(--border)' }}>
+              <div className='flex items-center gap-1.5 text-xs' style={{ color: 'var(--text-muted)' }}>
+                <GraduationCap size={14} />
+                {course.lecturer_name || 'No lecturer assigned'}
+              </div>
+            </div>
+            <div className='flex items-center justify-between mt-2'>
+              <div className='flex items-center gap-1.5 text-xs' style={{ color: 'var(--text-muted)' }}>
+                <Users2 size={14} />
+                <span className='font-mono-data'>{course.enrolled_count ?? 0}</span> enrolled
+              </div>
+              <div className='flex gap-1.5'>
+                {course.semester && (
+                  <span className='px-2 py-1 rounded-lg text-xs'
+                    style={{ background: 'color-mix(in srgb, var(--primary) 15%, transparent)', color: 'var(--primary)' }}>
+                    {course.semester}
+                  </span>
+                )}
+                {course.year && (
+                  <span className='px-2 py-1 rounded-lg text-xs'
+                    style={{ background: 'color-mix(in srgb, var(--secondary) 15%, transparent)', color: 'var(--secondary)' }}>
+                    {course.year}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         ))}
