@@ -2,19 +2,31 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import {
   LayoutDashboard, Users, BookOpen, GraduationCap,
-  ClipboardList, Bell, User, LogOut, Building2, Menu, X
+  ClipboardList, Bell, User, LogOut, Building2, Menu, X, MoreHorizontal
 } from 'lucide-react'
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import api from '../utils/api'
 import PulseLogo from './PulseLogo'
 import ThemeToggle from './ThemeToggle'
 
 export default function Layout() {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
-  // Desktop: collapses the sidebar to an icon rail. Mobile: ignored — mobile
-  // always uses the full off-canvas drawer instead, controlled separately.
+  // Desktop: collapses the sidebar to an icon rail.
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [mobileOpen, setMobileOpen] = useState(false)
+  // Mobile: the bottom nav's "More" sheet, for anything past the 3 primary tabs.
+  const [moreOpen, setMoreOpen] = useState(false)
+
+  // Unresolved alert count for the nav badge. Only institution_admin and
+  // super_admin get a stats endpoint at all -- students/lecturers just see
+  // the Alerts page itself, no badge.
+  const { data: alertStats } = useQuery({
+    queryKey: ['alertStats'],
+    queryFn: () => api.get('/alerts/stats').then(r => r.data.stats),
+    enabled: ['institution_admin', 'super_admin'].includes(user?.role)
+  })
+  const alertBadge = alertStats?.unresolved_alerts || 0
 
   const handleLogout = () => {
     logout()
@@ -36,6 +48,13 @@ export default function Layout() {
     item.roles.includes('all') || item.roles.includes(user?.role)
   )
 
+  // The bottom nav only has room for a few tabs before it's cramped again --
+  // Dashboard, Grades, and Alerts are the ones that matter every day across
+  // every role, everything else (Students, Courses, Attendance,
+  // Institutions, Profile) lives behind "More".
+  const primaryMobile = filteredNav.filter(i => ['/dashboard', '/grades', '/alerts'].includes(i.to))
+  const overflowMobile = filteredNav.filter(i => !['/dashboard', '/grades', '/alerts'].includes(i.to))
+
   const NavList = ({ showLabels, onNavigate }) => (
     <nav className='flex-1 p-3 flex flex-col gap-1'>
       {filteredNav.map(({ to, icon: Icon, label }) => (
@@ -54,7 +73,13 @@ export default function Layout() {
                 style={{ width: 3, background: isActive ? 'var(--primary)' : 'transparent' }}
               />
               <Icon size={20} className='shrink-0' />
-              {showLabels && <span className='text-sm font-medium'>{label}</span>}
+              {showLabels && <span className='text-sm font-medium flex-1'>{label}</span>}
+              {to === '/alerts' && alertBadge > 0 && (
+                <span className='font-mono-data text-[10px] font-bold rounded-full flex items-center justify-center shrink-0'
+                  style={{ minWidth: 16, height: 16, padding: '0 4px', background: 'var(--danger)', color: '#fff' }}>
+                  {alertBadge > 99 ? '99+' : alertBadge}
+                </span>
+              )}
             </>
           )}
         </NavLink>
@@ -87,32 +112,47 @@ export default function Layout() {
   return (
     <div className='flex h-screen overflow-hidden' style={{ background: 'var(--dark)' }}>
 
-      {/* Mobile backdrop */}
-      {mobileOpen && (
+      {/* Mobile "More" sheet backdrop */}
+      {moreOpen && (
         <div
           className='fixed inset-0 z-30 lg:hidden'
           style={{ background: 'var(--overlay)' }}
-          onClick={() => setMobileOpen(false)}
+          onClick={() => setMoreOpen(false)}
         />
       )}
 
-      {/* Mobile off-canvas drawer */}
+      {/* Mobile "More" sheet -- slides up from the bottom nav, holds
+          everything that doesn't fit as a primary tab */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-72 max-w-[80vw] flex flex-col transition-transform duration-300 lg:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
-        style={{ background: 'var(--dark-secondary)', borderRight: '1px solid var(--border)' }}
+        className={`fixed inset-x-0 bottom-0 z-40 max-h-[75vh] flex flex-col rounded-t-2xl transition-transform duration-300 lg:hidden ${moreOpen ? 'translate-y-0' : 'translate-y-full'}`}
+        style={{ background: 'var(--dark-secondary)', borderTop: '1px solid var(--border)' }}
       >
         <div className='flex items-center justify-between p-4' style={{ borderBottom: '1px solid var(--border)' }}>
           <div className='flex items-center gap-2 min-w-0'>
             <PulseLogo size={32} />
             <span className='font-bold text-lg truncate' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>EduPulse</span>
           </div>
-          <button onClick={() => setMobileOpen(false)}
+          <button onClick={() => setMoreOpen(false)}
             style={{ color: 'var(--text-muted)' }}
             className='hover:text-[var(--text)] transition-colors shrink-0'>
             <X size={22} />
           </button>
         </div>
-        <NavList showLabels onNavigate={() => setMobileOpen(false)} />
+        <nav className='p-3 flex flex-col gap-1 overflow-y-auto'>
+          {overflowMobile.map(({ to, icon: Icon, label }) => (
+            <NavLink key={to} to={to} onClick={() => setMoreOpen(false)}
+              className={({ isActive }) =>
+                `relative flex items-center gap-3 pl-3 pr-3 py-2.5 rounded-lg transition-all duration-200 ${isActive ? '' : 'hover:text-[var(--text)]'}`
+              }
+              style={({ isActive }) => ({
+                background: isActive ? `rgba(var(--primary-rgb), 0.12)` : 'transparent',
+                color: isActive ? 'var(--primary)' : 'var(--text-muted)'
+              })}>
+              <Icon size={20} className='shrink-0' />
+              <span className='text-sm font-medium'>{label}</span>
+            </NavLink>
+          ))}
+        </nav>
         <UserFooter showLabels />
       </aside>
 
@@ -141,13 +181,10 @@ export default function Layout() {
       {/* Main column */}
       <div className='flex-1 flex flex-col min-w-0 overflow-hidden'>
 
-        {/* Mobile top bar */}
+        {/* Mobile top bar -- just branding now, navigation lives in the
+            bottom nav instead */}
         <div className='flex lg:hidden items-center justify-between px-4 py-3 shrink-0'
           style={{ background: 'var(--dark-secondary)', borderBottom: '1px solid var(--border)' }}>
-          <button onClick={() => setMobileOpen(true)}
-            style={{ color: 'var(--text)' }}>
-            <Menu size={24} />
-          </button>
           <div className='flex items-center gap-2'>
             <PulseLogo size={26} />
             <span className='font-bold' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>EduPulse</span>
@@ -155,9 +192,36 @@ export default function Layout() {
           <ThemeToggle variant='icon' />
         </div>
 
-        <main className='flex-1 overflow-auto p-4 sm:p-6'>
+        {/* Content scrolls independently between the top bar and bottom nav */}
+        <main className='flex-1 overflow-auto p-4 sm:p-6 pb-20 lg:pb-6'>
           <Outlet />
         </main>
+
+        {/* Mobile bottom nav -- fixed to the viewport bottom, always visible.
+            3 primary tabs plus "More" for everything else. */}
+        <nav className='flex lg:hidden items-center justify-around px-2 py-2.5 shrink-0'
+          style={{ background: 'var(--dark-secondary)', borderTop: '1px solid var(--border)' }}>
+          {primaryMobile.map(({ to, icon: Icon, label }) => (
+            <NavLink key={to} to={to}
+              className='flex flex-col items-center gap-1 px-3 py-1'>
+              {({ isActive }) => (
+                <>
+                  <span className='relative'>
+                    <Icon size={20} strokeWidth={isActive ? 2.4 : 1.8} style={{ color: isActive ? 'var(--primary)' : 'var(--text-muted)' }} />
+                    {to === '/alerts' && alertBadge > 0 && (
+                      <span className='absolute -top-1 -right-1.5 rounded-full' style={{ width: 7, height: 7, background: 'var(--danger)', border: '1.5px solid var(--dark-secondary)' }} />
+                    )}
+                  </span>
+                  <span className='text-[10px]' style={{ color: isActive ? 'var(--primary)' : 'var(--text-muted)', fontWeight: isActive ? 600 : 500 }}>{label}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
+          <button onClick={() => setMoreOpen(true)} className='flex flex-col items-center gap-1 px-3 py-1'>
+            <MoreHorizontal size={20} strokeWidth={1.8} style={{ color: moreOpen ? 'var(--primary)' : 'var(--text-muted)' }} />
+            <span className='text-[10px]' style={{ color: moreOpen ? 'var(--primary)' : 'var(--text-muted)', fontWeight: moreOpen ? 600 : 500 }}>More</span>
+          </button>
+        </nav>
       </div>
     </div>
   )
