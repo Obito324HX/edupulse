@@ -95,13 +95,14 @@ export default function Students() {
       </div>
 
       {/* Search */}
-      <div className='flex items-center gap-3 px-4 py-3 rounded-xl'
-        style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
-        <Search size={18} style={{ color: 'var(--text-muted)' }} />
+      <div className='input-wrap' style={{ maxWidth: 320 }}>
+        <Search size={14} className='leading' style={{ position: 'absolute', left: 13, color: 'var(--faint, var(--text-muted))' }} />
         <input value={search} onChange={e => setSearch(e.target.value)}
-          placeholder='Search students...'
-          className='flex-1 bg-transparent outline-none text-sm'
-          style={{ color: 'var(--text)' }} />
+          placeholder='Search students…'
+          style={{
+            width: '100%', padding: '11px 14px 11px 38px', borderRadius: 12, fontSize: 13.5,
+            outline: 'none', background: 'var(--dark-secondary)', color: 'var(--text)', border: '1px solid var(--border)'
+          }} />
       </div>
 
       {/* Filter chips */}
@@ -112,83 +113,63 @@ export default function Students() {
           { id: 'flagged', label: 'Flagged', count: flaggedCount },
         ].map(chip => (
           <button key={chip.id} onClick={() => setStatusFilter(chip.id)}
-            className='flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors'
-            style={{
-              background: statusFilter === chip.id
-                ? (chip.id === 'flagged' ? 'var(--danger)' : 'var(--primary)')
-                : 'var(--dark-secondary)',
-              color: statusFilter === chip.id ? 'var(--on-primary)' : 'var(--text-muted)',
-              border: `1px solid ${statusFilter === chip.id ? 'transparent' : 'var(--border)'}`
-            }}>
-            {chip.label} <span className='font-mono-data'>{chip.count}</span>
+            className={`chip${statusFilter === chip.id ? ' on' : ''}`}>
+            {chip.label} · <span className='font-mono-data'>{chip.count}</span>
           </button>
         ))}
       </div>
 
-      {/* Table */}
-      <div className='rounded-2xl overflow-hidden' style={{ border: '1px solid var(--border)' }}>
-        <div className='overflow-x-auto'>
-        <table className='w-full'>
-          <thead>
-            <tr style={{ background: 'var(--dark-secondary)' }}>
-              <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Name</th>
-              <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Email</th>
-              <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Phone</th>
-              <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Status</th>
-              <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr><td colSpan={5} className='text-center py-8' style={{ color: 'var(--text-muted)' }}>Loading...</td></tr>
-            ) : filtered?.length === 0 ? (
-              <tr><td colSpan={5} className='text-center py-8' style={{ color: 'var(--text-muted)' }}>
-                {statusFilter !== 'all' || search ? 'No students match this filter' : 'No students found'}
-              </td></tr>
-            ) : filtered?.map((student, i) => (
-              <tr key={student.id} style={{ borderTop: '1px solid var(--border)', background: i % 2 === 0 ? 'var(--dark)' : 'var(--dark-secondary)' }}>
-                <td className='px-6 py-4'>
-                  <div className='flex items-center gap-3'>
-                    <div className='w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold text-on-primary shrink-0'
-                      style={{ background: 'var(--primary)' }}>
-                      {student.first_name[0]}{student.last_name[0]}
-                    </div>
-                    <span className='text-sm font-medium' style={{ color: 'var(--text)' }}>
-                      {student.first_name} {student.last_name}
-                    </span>
-                    {flaggedIds.has(student.id) && (
-                      <span title='Has an unresolved alert' className='flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0'
-                        style={{ background: 'color-mix(in srgb, var(--danger) 15%, transparent)', color: 'var(--danger)' }}>
-                        <AlertTriangle size={10} /> Flagged
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td className='px-6 py-4 text-sm' style={{ color: 'var(--text-muted)' }}>{student.email}</td>
-                <td className='px-6 py-4 text-sm' style={{ color: 'var(--text-muted)' }}>{student.phone || '—'}</td>
-                <td className='px-6 py-4'>
-                  <span className='px-3 py-1 rounded-full text-xs font-medium'
-                    style={{
-                      background: student.is_active
-                        ? 'color-mix(in srgb, var(--success) 15%, transparent)'
-                        : 'color-mix(in srgb, var(--danger) 15%, transparent)',
-                      color: student.is_active ? 'var(--success)' : 'var(--danger)'
-                    }}>
-                    {student.is_active ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
-                <td className='px-6 py-4'>
-                  <button onClick={() => { setSelectedStudent(student); setShowEnrollModal(true) }}
-                    className='flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-on-primary'
-                    style={{ background: 'var(--primary)' }}>
-                    <UserPlus size={14} /> Enroll
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Row list */}
+      <div className='table-wrap'>
+        <div className='t-head'>
+          <span style={{ flex: 2 }}>Student</span>
+          <span style={{ flex: 1.6 }}>Contact</span>
+          <span style={{ width: 90, textAlign: 'right' }}>Status</span>
+          <span style={{ width: 90, textAlign: 'right' }}>Actions</span>
         </div>
+        {isLoading ? (
+          <div className='text-center py-8 text-sm' style={{ color: 'var(--text-muted)' }}>Loading...</div>
+        ) : filtered?.length === 0 ? (
+          <div className='text-center py-8 text-sm' style={{ color: 'var(--text-muted)' }}>
+            {statusFilter !== 'all' || search ? 'No students match this filter' : 'No students found'}
+          </div>
+        ) : filtered?.map(student => (
+          <div key={student.id} className='t-row'>
+            <span style={{ flex: 2, display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+              <div className='avatar' style={{ width: 32, height: 32, fontSize: 11 }}>
+                {student.first_name[0]}{student.last_name[0]}
+              </div>
+              <span className='truncate' style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>
+                {student.first_name} {student.last_name}
+              </span>
+              {flaggedIds.has(student.id) && (
+                <span title='Has an unresolved alert' className='pill-status flex items-center gap-1 shrink-0'
+                  style={{ background: 'color-mix(in srgb, var(--danger) 15%, transparent)', color: 'var(--danger)' }}>
+                  <AlertTriangle size={10} /> Flagged
+                </span>
+              )}
+            </span>
+            <span style={{ flex: 1.6, fontSize: 12.5, color: 'var(--text-muted)' }} className='truncate'>
+              {student.email}
+            </span>
+            <span style={{ width: 90, textAlign: 'right' }}>
+              <span className='pill-status' style={{
+                background: student.is_active
+                  ? 'color-mix(in srgb, var(--success) 15%, transparent)'
+                  : 'color-mix(in srgb, var(--danger) 15%, transparent)',
+                color: student.is_active ? 'var(--success)' : 'var(--danger)'
+              }}>
+                {student.is_active ? 'Active' : 'Inactive'}
+              </span>
+            </span>
+            <span style={{ width: 90, textAlign: 'right' }}>
+              <button onClick={() => { setSelectedStudent(student); setShowEnrollModal(true) }}
+                className='icon-btn' title='Enroll in a course' style={{ marginLeft: 'auto' }}>
+                <UserPlus size={15} style={{ color: 'var(--text-muted)' }} />
+              </button>
+            </span>
+          </div>
+        ))}
       </div>
 
       {/* Enroll Modal */}
