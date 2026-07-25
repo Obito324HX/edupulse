@@ -7,7 +7,7 @@ import {
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import api from '../utils/api'
-import PulseLogo from './PulseLogo'
+import PulseWordmark from './PulseWordmark'
 import ThemeToggle from './ThemeToggle'
 import CommandPalette from './CommandPalette'
 
@@ -87,11 +87,8 @@ export default function Layout() {
         style={{ background: 'var(--dark-secondary)', borderRight: '1px solid var(--border-soft)' }}
       >
         <div className='flex items-center justify-between px-1 mb-[26px]'>
-          <div className='flex items-center gap-2 min-w-0'>
-            <PulseLogo size={28} />
-            <span className='font-semibold text-base truncate' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>
-              Edu<span className='text-accent'>Pulse</span>
-            </span>
+          <div className='min-w-0'>
+            <PulseWordmark size={19} />
           </div>
           <button onClick={() => setRailOpen(false)} style={{ color: 'var(--text-muted)' }} className='lg:hidden shrink-0'>
             <X size={18} />

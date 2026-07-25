@@ -1,28 +1,14 @@
 <svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#4F46E5"/>
-      <stop offset="100%" stop-color="#7C3AED"/>
+    <linearGradient id="chipBg" x1="15%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%" stop-color="#1d1533"/>
+      <stop offset="100%" stop-color="#170f2b"/>
     </linearGradient>
-    <linearGradient id="pulseGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#34D399"/>
-      <stop offset="100%" stop-color="#60A5FA"/>
+    <linearGradient id="dotGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0b876"/>
+      <stop offset="100%" stop-color="#cc9f5c"/>
     </linearGradient>
   </defs>
-
-  <rect width="256" height="256" rx="56" fill="url(#bgGrad)"/>
-
-  <g transform="translate(0, -14)">
-    <path d="M128 70 L206 100 L128 130 L50 100 Z" fill="#FFFFFF"/>
-    <path d="M84 112 L84 148 C84 148 100 164 128 164 C156 164 172 148 172 148 L172 112 L128 128 Z" fill="#E0E7FF"/>
-    <line x1="206" y1="100" x2="206" y2="140" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
-    <circle cx="206" cy="146" r="6" fill="#FFFFFF"/>
-  </g>
-
-  <path d="M28 196 H84 L100 168 L118 224 L136 176 L150 196 H228"
-        fill="none"
-        stroke="url(#pulseGrad)"
-        stroke-width="9"
-        stroke-linecap="round"
-        stroke-linejoin="round"/>
+  <rect width="256" height="256" rx="58" fill="url(#chipBg)"/>
+  <circle cx="128" cy="128" r="30" fill="url(#dotGrad)"/>
 </svg>

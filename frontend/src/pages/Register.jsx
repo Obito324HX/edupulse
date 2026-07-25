@@ -4,7 +4,7 @@ import { useAuthStore } from '../store/authStore'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
 import { Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react'
-import PulseLogo from '../components/PulseLogo'
+import PulseWordmark from '../components/PulseWordmark'
 import ThemeToggle from '../components/ThemeToggle'
 import FloatingInput from '../components/FloatingInput'
 
@@ -57,11 +57,8 @@ export default function Register() {
       <div className='w-full max-w-md'>
         <div className='text-center mb-8'>
           <div className='mx-auto mb-5 w-fit'>
-            <PulseLogo size={56} />
+            <PulseWordmark size={34} />
           </div>
-          <h1 className='text-4xl font-semibold' style={{ color: 'var(--text)' }}>
-            Edu<span className='text-accent'>Pulse</span>
-          </h1>
           <p className='mt-2 text-sm' style={{ color: 'var(--text-muted)' }}>Create your account</p>
         </div>
         <div className='rounded-3xl p-8 shadow-2xl' style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>

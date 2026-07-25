@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
 import { ArrowLeft, MailCheck } from 'lucide-react'
-import PulseLogo from '../components/PulseLogo'
+import PulseWordmark from '../components/PulseWordmark'
 import ThemeToggle from '../components/ThemeToggle'
 import FloatingInput from '../components/FloatingInput'
 
@@ -36,11 +36,8 @@ export default function ForgotPassword() {
       <div className='w-full max-w-md'>
         <div className='text-center mb-8'>
           <div className='mx-auto mb-5 w-fit'>
-            <PulseLogo size={56} />
+            <PulseWordmark size={34} />
           </div>
-          <h1 className='text-4xl font-semibold' style={{ color: 'var(--text)' }}>
-            Edu<span className='text-accent'>Pulse</span>
-          </h1>
         </div>
 
         <div className='rounded-3xl p-8 shadow-2xl'

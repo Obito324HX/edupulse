@@ -4,7 +4,7 @@ import { useAuthStore } from '../store/authStore'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
 import { Eye, EyeOff } from 'lucide-react'
-import PulseLogo from '../components/PulseLogo'
+import PulseWordmark from '../components/PulseWordmark'
 import PulseECG from '../components/PulseECG'
 import ThemeToggle from '../components/ThemeToggle'
 import FloatingInput from '../components/FloatingInput'
@@ -44,11 +44,8 @@ export default function Login() {
         style={{
           background: `radial-gradient(70% 55% at 15% 8%, color-mix(in srgb, var(--secondary) 24%, transparent), transparent 60%), radial-gradient(60% 50% at 90% 95%, color-mix(in srgb, var(--primary) 20%, transparent), transparent 60%), var(--dark)`
         }}>
-        <div className='flex items-center gap-2 relative z-10'>
-          <PulseLogo size={30} />
-          <span className='font-semibold' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>
-            Edu<span className='text-accent'>Pulse</span>
-          </span>
+        <div className='relative z-10'>
+          <PulseWordmark size={22} />
         </div>
 
         <div className='relative z-10 max-w-md'>
@@ -78,11 +75,8 @@ export default function Login() {
               Matches the blueprint: a compact wordmark row, then a proof-card near the
               top instead of a full-width logo tile. */}
           <div className='lg:hidden mb-8'>
-            <div className='flex items-center gap-2 mb-6'>
-              <PulseLogo size={30} />
-              <span className='font-semibold' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>
-                Edu<span className='text-accent'>Pulse</span>
-              </span>
+            <div className='mb-6'>
+              <PulseWordmark size={22} />
             </div>
             <div className='proof-card' style={{
               background: `radial-gradient(90% 130% at 0% 0%, color-mix(in srgb, var(--secondary) 20%, transparent), transparent 60%), var(--dark-secondary)`
