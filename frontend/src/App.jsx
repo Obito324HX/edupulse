@@ -40,6 +40,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
+        <div className='app-grain' />
         <Toaster position='top-right' />
         <Routes>
           <Route path='/login' element={<Login />} />

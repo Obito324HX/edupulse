@@ -106,52 +106,41 @@ export default function Grades() {
         </div>
       )}
 
-      <div className='rounded-2xl overflow-hidden' style={{ border: '1px solid var(--border)' }}>
-        <div className='overflow-x-auto'>
-        <table className='w-full'>
-          <thead>
-            <tr style={{ background: 'var(--dark-secondary)' }}>
-              {canEnter && <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Student</th>}
-              <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Assignment</th>
-              <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Type</th>
-              <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Score</th>
-              <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Percentage</th>
-              <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr><td colSpan={canEnter ? 6 : 5} className='text-center py-8' style={{ color: 'var(--text-muted)' }}>Loading...</td></tr>
-            ) : !grades || grades.length === 0 ? (
-              <tr><td colSpan={canEnter ? 6 : 5} className='text-center py-8' style={{ color: 'var(--text-muted)' }}>No grades yet</td></tr>
-            ) : grades?.map((grade, i) => (
-              <tr key={grade.id} style={{ borderTop: '1px solid var(--border)', background: i % 2 === 0 ? 'var(--dark)' : 'var(--dark-secondary)' }}>
-                {canEnter && (
-                  <td className='px-6 py-4 text-sm font-medium' style={{ color: 'var(--text)' }}>
-                    {grade.student_name || '—'}
-                  </td>
-                )}
-                <td className='px-6 py-4 text-sm font-medium' style={{ color: 'var(--text)' }}>{grade.assignment_name}</td>
-                <td className='px-6 py-4'>
-                  <span className='px-2 py-1 rounded-lg text-xs capitalize'
-                    style={{ background: 'color-mix(in srgb, var(--primary) 15%, transparent)', color: 'var(--primary)' }}>
-                    {grade.type}
-                  </span>
-                </td>
-                <td className='px-6 py-4 text-sm' style={{ color: 'var(--text-muted)' }}>{grade.score}/{grade.max_score}</td>
-                <td className='px-6 py-4'>
-                  <span className='font-semibold text-sm' style={{ color: getColor(grade.percentage) }}>
-                    {grade.percentage?.toFixed(1)}%
-                  </span>
-                </td>
-                <td className='px-6 py-4 text-sm' style={{ color: 'var(--text-muted)' }}>
-                  {new Date(grade.created_at).toLocaleDateString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className='table-wrap'>
+        <div className='t-head'>
+          {canEnter && <span style={{ flex: 1.6 }}>Student</span>}
+          <span style={{ flex: 1.8 }}>Assignment</span>
+          <span style={{ flex: 1 }}>Type</span>
+          <span style={{ flex: 1 }}>Score</span>
+          <span style={{ width: 90, textAlign: 'right' }}>Average</span>
         </div>
+        {isLoading ? (
+          <div className='text-center py-8 text-sm' style={{ color: 'var(--text-muted)' }}>Loading...</div>
+        ) : !grades || grades.length === 0 ? (
+          <div className='text-center py-8 text-sm' style={{ color: 'var(--text-muted)' }}>No grades yet</div>
+        ) : grades?.map(grade => (
+          <div key={grade.id} className='t-row'>
+            {canEnter && (
+              <span style={{ flex: 1.6, display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }} className='truncate'>
+                <div className='avatar' style={{ width: 28, height: 28, fontSize: 10 }}>
+                  {(grade.student_name || '—').split(' ').map(w => w[0]).slice(0, 2).join('')}
+                </div>
+                <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }} className='truncate'>{grade.student_name || '—'}</span>
+              </span>
+            )}
+            <span style={{ flex: 1.8, fontSize: 13, fontWeight: 500, color: 'var(--text)' }} className='truncate'>{grade.assignment_name}</span>
+            <span style={{ flex: 1 }}>
+              <span className='pill-status capitalize'
+                style={{ background: 'color-mix(in srgb, var(--primary) 15%, transparent)', color: 'var(--primary)' }}>
+                {grade.type}
+              </span>
+            </span>
+            <span style={{ flex: 1, fontSize: 12.5, color: 'var(--text-muted)' }} className='font-mono-data'>{grade.score}/{grade.max_score}</span>
+            <span style={{ width: 90, textAlign: 'right' }} className='font-mono-data font-semibold text-sm' >
+              <span style={{ color: getColor(grade.percentage) }}>{grade.percentage?.toFixed(1)}%</span>
+            </span>
+          </div>
+        ))}
       </div>
 
       {/* Add Grade Modal */}

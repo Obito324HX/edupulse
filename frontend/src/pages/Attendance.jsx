@@ -90,75 +90,67 @@ export default function Attendance() {
         </select>
       )}
 
-      <div className='rounded-2xl overflow-hidden' style={{ border: '1px solid var(--border)' }}>
-        <div className='overflow-x-auto'>
+      <div className='table-wrap'>
         {canMark ? (
-          <table className='w-full'>
-            <thead>
-              <tr style={{ background: 'var(--dark-secondary)' }}>
-                <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Student</th>
-                <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Present</th>
-                <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Absent</th>
-                <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Late</th>
-                <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Attendance rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              {!selectedCourse ? (
-                <tr><td colSpan={5} className='text-center py-8' style={{ color: 'var(--text-muted)' }}>Select a course to view attendance</td></tr>
-              ) : isLoading ? (
-                <tr><td colSpan={5} className='text-center py-8' style={{ color: 'var(--text-muted)' }}>Loading...</td></tr>
-              ) : !records || records.length === 0 ? (
-                <tr><td colSpan={5} className='text-center py-8' style={{ color: 'var(--text-muted)' }}>No attendance records for this course yet</td></tr>
-              ) : records?.map((row, i) => (
-                <tr key={row.student_id} style={{ borderTop: '1px solid var(--border)', background: i % 2 === 0 ? 'var(--dark)' : 'var(--dark-secondary)' }}>
-                  <td className='px-6 py-4 text-sm font-medium' style={{ color: 'var(--text)' }}>{row.student_name || '—'}</td>
-                  <td className='px-6 py-4 text-sm font-mono-data' style={{ color: 'var(--success)' }}>{row.present}</td>
-                  <td className='px-6 py-4 text-sm font-mono-data' style={{ color: 'var(--danger)' }}>{row.absent}</td>
-                  <td className='px-6 py-4 text-sm font-mono-data' style={{ color: 'var(--warning)' }}>{row.late}</td>
-                  <td className='px-6 py-4'>
-                    <span className='font-semibold text-sm font-mono-data' style={{ color: getRateColor(row.attendance_rate) }}>
-                      {row.attendance_rate}%
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <>
+            <div className='t-head'>
+              <span style={{ flex: 2 }}>Student</span>
+              <span style={{ flex: 0.8 }}>Present</span>
+              <span style={{ flex: 0.8 }}>Absent</span>
+              <span style={{ flex: 0.8 }}>Late</span>
+              <span style={{ width: 90, textAlign: 'right' }}>Rate</span>
+            </div>
+            {!selectedCourse ? (
+              <div className='text-center py-8 text-sm' style={{ color: 'var(--text-muted)' }}>Select a course to view attendance</div>
+            ) : isLoading ? (
+              <div className='text-center py-8 text-sm' style={{ color: 'var(--text-muted)' }}>Loading...</div>
+            ) : !records || records.length === 0 ? (
+              <div className='text-center py-8 text-sm' style={{ color: 'var(--text-muted)' }}>No attendance records for this course yet</div>
+            ) : records?.map(row => (
+              <div key={row.student_id} className='t-row'>
+                <span style={{ flex: 2, display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }} className='truncate'>
+                  <div className='avatar' style={{ width: 30, height: 30, fontSize: 10.5 }}>
+                    {(row.student_name || '—').split(' ').map(w => w[0]).slice(0, 2).join('')}
+                  </div>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }} className='truncate'>{row.student_name || '—'}</span>
+                </span>
+                <span style={{ flex: 0.8, color: 'var(--success)' }} className='font-mono-data text-sm'>{row.present}</span>
+                <span style={{ flex: 0.8, color: 'var(--danger)' }} className='font-mono-data text-sm'>{row.absent}</span>
+                <span style={{ flex: 0.8, color: 'var(--warning)' }} className='font-mono-data text-sm'>{row.late}</span>
+                <span style={{ width: 90, textAlign: 'right' }} className='font-mono-data font-semibold text-sm'>
+                  <span style={{ color: getRateColor(row.attendance_rate) }}>{row.attendance_rate}%</span>
+                </span>
+              </div>
+            ))}
+          </>
         ) : (
-          <table className='w-full'>
-            <thead>
-              <tr style={{ background: 'var(--dark-secondary)' }}>
-                <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Date</th>
-                <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Course</th>
-                <th className='text-left px-6 py-4 text-sm font-medium' style={{ color: 'var(--text-muted)' }}>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr><td colSpan={3} className='text-center py-8' style={{ color: 'var(--text-muted)' }}>Loading...</td></tr>
-              ) : !records || records.length === 0 ? (
-                <tr><td colSpan={3} className='text-center py-8' style={{ color: 'var(--text-muted)' }}>No attendance records</td></tr>
-              ) : records?.map((record, i) => (
-                <tr key={record.id} style={{ borderTop: '1px solid var(--border)', background: i % 2 === 0 ? 'var(--dark)' : 'var(--dark-secondary)' }}>
-                  <td className='px-6 py-4 text-sm' style={{ color: 'var(--text)' }}>
-                    {new Date(record.date).toLocaleDateString()}
-                  </td>
-                  <td className='px-6 py-4 text-sm' style={{ color: 'var(--text-muted)' }}>
-                    {record.course_name ? `${record.course_name} (${record.course_code})` : `Course #${record.course_id}`}
-                  </td>
-                  <td className='px-6 py-4'>
-                    <span className='px-3 py-1 rounded-full text-xs font-medium capitalize'
-                      style={getStatusStyle(record.status)}>
-                      {record.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <>
+            <div className='t-head'>
+              <span style={{ flex: 1 }}>Date</span>
+              <span style={{ flex: 2 }}>Course</span>
+              <span style={{ width: 90, textAlign: 'right' }}>Status</span>
+            </div>
+            {isLoading ? (
+              <div className='text-center py-8 text-sm' style={{ color: 'var(--text-muted)' }}>Loading...</div>
+            ) : !records || records.length === 0 ? (
+              <div className='text-center py-8 text-sm' style={{ color: 'var(--text-muted)' }}>No attendance records</div>
+            ) : records?.map(record => (
+              <div key={record.id} className='t-row'>
+                <span style={{ flex: 1, fontSize: 13, color: 'var(--text)' }}>
+                  {new Date(record.date).toLocaleDateString()}
+                </span>
+                <span style={{ flex: 2, fontSize: 13, color: 'var(--text-muted)' }} className='truncate'>
+                  {record.course_name ? `${record.course_name} (${record.course_code})` : `Course #${record.course_id}`}
+                </span>
+                <span style={{ width: 90, textAlign: 'right' }}>
+                  <span className='pill-status capitalize' style={getStatusStyle(record.status)}>
+                    {record.status}
+                  </span>
+                </span>
+              </div>
+            ))}
+          </>
         )}
-        </div>
       </div>
 
       {/* Mark Attendance Modal */}

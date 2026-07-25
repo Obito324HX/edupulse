@@ -123,6 +123,197 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--on-primary);
 }
 
+/* ---------------------------------------------------------------
+   Grain texture -- subtle noise layer over the whole app, matching
+   the blueprint. Fixed + pointer-events:none so it never interferes
+   with interaction; opacity is deliberately faint (3.5%).
+   ----------------------------------------------------------------*/
+.app-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  z-index: 999;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------------------------------------------------------------
+   Shared component classes from the blueprint. Pages currently
+   reimplement these with inline styles per-instance -- use these
+   instead so every card/chip/avatar looks identical everywhere.
+   ----------------------------------------------------------------*/
+.card {
+  border-radius: 16px;
+  background: var(--dark-secondary);
+  border: 1px solid var(--border);
+  transition: border-color .15s;
+}
+.card:hover {
+  border-color: color-mix(in srgb, var(--text) 16%, var(--border));
+}
+
+.row-divider {
+  border-bottom: 1px solid var(--border);
+}
+
+.chip {
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--dark-secondary);
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.chip.on {
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  background: var(--surface-raised);
+  color: var(--text);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.avatar-stack {
+  display: flex;
+  flex-shrink: 0;
+}
+.avatar-stack span {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-size: 10px;
+  font-weight: 600;
+  border: 2px solid var(--dark-secondary);
+  margin-left: -8px;
+}
+.avatar-stack span:first-child {
+  margin-left: 0;
+}
+
+.badge-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--danger);
+  border-radius: 999px;
+  min-width: 15px;
+  height: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--dark-secondary);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: border-color .15s, background .15s;
+}
+.icon-btn:hover {
+  border-color: color-mix(in srgb, var(--text) 16%, var(--border));
+  background: var(--surface-raised);
+}
+.icon-btn .dot {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--danger);
+  border: 1.5px solid var(--dark);
+}
+
+.proof-card {
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--text) 4.5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text) 16%, var(--border));
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Row-list pattern -- replaces raw <table> markup on Students/Grades/
+   Attendance. A "table-wrap" holds an optional header row (t-head)
+   and any number of t-rows; each t-row is a flex row, not a <tr>, so
+   the same avatar/pill-status pieces from elsewhere in the app work
+   inside it unchanged. */
+.table-wrap {
+  border-radius: 16px;
+  background: var(--dark-secondary);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.t-head {
+  display: flex;
+  padding: 12px 18px;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+.t-row {
+  display: flex;
+  align-items: center;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+  gap: 10px;
+}
+.t-row:last-child {
+  border-bottom: none;
+}
+.t-row:hover {
+  background: color-mix(in srgb, var(--text) 2.5%, transparent);
+}
+
+.attention-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+}
+.attention-row:hover {
+  background: color-mix(in srgb, var(--text) 2.5%, transparent);
+}
+
+.pill-status {
+  font-size: 9.5px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-weight: 600;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }
