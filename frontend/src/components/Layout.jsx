@@ -56,27 +56,21 @@ export default function Layout() {
   const overflowMobile = filteredNav.filter(i => !['/dashboard', '/grades', '/alerts'].includes(i.to))
 
   const NavList = ({ showLabels, onNavigate }) => (
-    <nav className='flex-1 p-3 flex flex-col gap-1'>
+    <nav className='flex-1 px-3 flex flex-col gap-0.5'>
       {filteredNav.map(({ to, icon: Icon, label }) => (
         <NavLink key={to} to={to} onClick={onNavigate}
-          className={({ isActive }) =>
-            `relative flex items-center gap-3 pl-3 pr-3 py-2.5 rounded-lg transition-all duration-200 ${isActive ? '' : 'hover:text-[var(--text)]'}`
-          }
+          className='flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors duration-150 hover:bg-white/[0.04]'
           style={({ isActive }) => ({
-            background: isActive ? `rgba(var(--primary-rgb), 0.12)` : 'transparent',
-            color: isActive ? 'var(--primary)' : 'var(--text-muted)'
+            background: isActive ? 'color-mix(in srgb, var(--primary) 14%, transparent)' : undefined,
+            color: isActive ? 'var(--text)' : 'var(--text-muted)'
           })}>
           {({ isActive }) => (
             <>
-              <span
-                className='absolute left-0 top-1.5 bottom-1.5 rounded-full transition-all duration-200'
-                style={{ width: 3, background: isActive ? 'var(--primary)' : 'transparent' }}
-              />
-              <Icon size={20} className='shrink-0' />
-              {showLabels && <span className='text-sm font-medium flex-1'>{label}</span>}
+              <Icon size={17} strokeWidth={isActive ? 2.1 : 1.8} className='shrink-0' style={{ color: isActive ? 'var(--primary)' : 'var(--text-muted)' }} />
+              {showLabels && <span className='text-[13px] flex-1' style={{ fontWeight: isActive ? 600 : 500 }}>{label}</span>}
               {to === '/alerts' && alertBadge > 0 && (
-                <span className='font-mono-data text-[10px] font-bold rounded-full flex items-center justify-center shrink-0'
-                  style={{ minWidth: 16, height: 16, padding: '0 4px', background: 'var(--danger)', color: '#fff' }}>
+                <span className='font-mono-data text-[9px] font-bold rounded-full flex items-center justify-center shrink-0'
+                  style={{ minWidth: 15, height: 15, padding: '0 4px', background: 'var(--danger)', color: '#fff' }}>
                   {alertBadge > 99 ? '99+' : alertBadge}
                 </span>
               )}
@@ -88,23 +82,29 @@ export default function Layout() {
   )
 
   const UserFooter = ({ showLabels, collapsedToggle = false }) => (
-    <div className='p-3' style={{ borderTop: '1px solid var(--border)' }}>
+    <div className='px-3 mt-2 flex flex-col gap-2'>
       {showLabels && (
-        <div className='mb-2 px-3 py-2 min-w-0'>
-          <p className='text-sm font-medium truncate' style={{ color: 'var(--text)' }}>
-            {user?.first_name} {user?.last_name}
-          </p>
-          <p className='text-xs capitalize' style={{ color: 'var(--text-muted)' }}>
-            {user?.role?.replace('_', ' ')}
-          </p>
+        <div className='flex items-center gap-2.5 px-2.5 py-2 rounded-xl min-w-0' style={{ background: 'var(--dark)' }}>
+          <div className='w-8 h-8 rounded-lg flex items-center justify-center shrink-0 font-semibold text-xs'
+            style={{ background: 'var(--primary)', color: 'var(--on-primary)', fontFamily: "'Fraunces', serif" }}>
+            {user?.first_name?.[0]}{user?.last_name?.[0]}
+          </div>
+          <div className='min-w-0'>
+            <p className='text-[13px] font-medium truncate' style={{ color: 'var(--text)' }}>
+              {user?.first_name} {user?.last_name}
+            </p>
+            <p className='text-[11px] capitalize truncate' style={{ color: 'var(--text-muted)' }}>
+              {user?.role?.replace('_', ' ')}
+            </p>
+          </div>
         </div>
       )}
       <ThemeToggle collapsed={collapsedToggle} />
       <button onClick={handleLogout}
-        className='flex items-center gap-3 px-3 py-2.5 rounded-lg w-full transition-all duration-200 hover:text-[var(--text)]'
+        className='flex items-center gap-3 px-3.5 py-2.5 rounded-xl w-full transition-colors duration-150 hover:bg-white/[0.04]'
         style={{ color: 'var(--text-muted)' }}>
-        <LogOut size={20} className='shrink-0' />
-        {showLabels && <span className='text-sm font-medium'>Logout</span>}
+        <LogOut size={17} className='shrink-0' />
+        {showLabels && <span className='text-[13px] font-medium'>Logout</span>}
       </button>
     </div>
   )
@@ -138,18 +138,20 @@ export default function Layout() {
             <X size={22} />
           </button>
         </div>
-        <nav className='p-3 flex flex-col gap-1 overflow-y-auto'>
+        <nav className='p-3 flex flex-col gap-0.5 overflow-y-auto'>
           {overflowMobile.map(({ to, icon: Icon, label }) => (
             <NavLink key={to} to={to} onClick={() => setMoreOpen(false)}
-              className={({ isActive }) =>
-                `relative flex items-center gap-3 pl-3 pr-3 py-2.5 rounded-lg transition-all duration-200 ${isActive ? '' : 'hover:text-[var(--text)]'}`
-              }
+              className='flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors duration-150'
               style={({ isActive }) => ({
-                background: isActive ? `rgba(var(--primary-rgb), 0.12)` : 'transparent',
-                color: isActive ? 'var(--primary)' : 'var(--text-muted)'
+                background: isActive ? 'color-mix(in srgb, var(--primary) 14%, transparent)' : 'transparent',
+                color: isActive ? 'var(--text)' : 'var(--text-muted)'
               })}>
-              <Icon size={20} className='shrink-0' />
-              <span className='text-sm font-medium'>{label}</span>
+              {({ isActive }) => (
+                <>
+                  <Icon size={17} strokeWidth={isActive ? 2.1 : 1.8} className='shrink-0' style={{ color: isActive ? 'var(--primary)' : 'var(--text-muted)' }} />
+                  <span className='text-[13px]' style={{ fontWeight: isActive ? 600 : 500 }}>{label}</span>
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -157,20 +159,22 @@ export default function Layout() {
       </aside>
 
       {/* Desktop sidebar */}
-      <aside className={`hidden lg:flex ${sidebarOpen ? 'w-64' : 'w-16'} transition-all duration-300 flex-col shrink-0`}
+      <aside className={`hidden lg:flex ${sidebarOpen ? 'w-[208px]' : 'w-16'} transition-all duration-300 flex-col shrink-0 py-[22px]`}
         style={{ background: 'var(--dark-secondary)', borderRight: '1px solid var(--border)' }}>
 
-        <div className='flex items-center justify-between p-4' style={{ borderBottom: '1px solid var(--border)' }}>
+        <div className='flex items-center justify-between px-3.5 mb-[26px]'>
           {sidebarOpen && (
             <div className='flex items-center gap-2 min-w-0'>
-              <PulseLogo size={32} />
-              <span className='font-bold text-lg truncate' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>EduPulse</span>
+              <PulseLogo size={28} />
+              <span className='font-semibold text-lg truncate' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>
+                Edu<span className='text-accent'>Pulse</span>
+              </span>
             </div>
           )}
           <button onClick={() => setSidebarOpen(!sidebarOpen)}
             style={{ color: 'var(--text-muted)' }}
             className='hover:text-[var(--text)] transition-colors shrink-0'>
-            {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+            {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
 
