@@ -2,12 +2,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../utils/api'
 import { Users, Search, UserPlus, X, ShieldPlus, AlertTriangle } from 'lucide-react'
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAuthStore } from '../store/authStore'
 
 export default function Students() {
   const { user } = useAuthStore()
-  const [search, setSearch] = useState('')
+  const [searchParams] = useSearchParams()
+  const [search, setSearch] = useState(searchParams.get('q') || '')
   const [statusFilter, setStatusFilter] = useState('all')
   const [showEnrollModal, setShowEnrollModal] = useState(false)
   const [showStaffModal, setShowStaffModal] = useState(false)

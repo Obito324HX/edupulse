@@ -2,13 +2,14 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import {
   LayoutDashboard, Users, BookOpen, GraduationCap,
-  ClipboardList, Bell, User, LogOut, Building2, Menu, X, MoreHorizontal
+  ClipboardList, Bell, User, LogOut, Building2, Menu, X, MoreHorizontal, Search
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import api from '../utils/api'
 import PulseLogo from './PulseLogo'
 import ThemeToggle from './ThemeToggle'
+import CommandPalette from './CommandPalette'
 
 export default function Layout() {
   const { user, logout } = useAuthStore()
@@ -17,6 +18,19 @@ export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   // Mobile: the bottom nav's "More" sheet, for anything past the 3 primary tabs.
   const [moreOpen, setMoreOpen] = useState(false)
+  // Command palette (⌘K / Ctrl+K)
+  const [paletteOpen, setPaletteOpen] = useState(false)
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setPaletteOpen(open => !open)
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   // Unresolved alert count for the nav badge. Only institution_admin and
   // super_admin get a stats endpoint at all -- students/lecturers just see
@@ -193,7 +207,27 @@ export default function Layout() {
             <PulseLogo size={26} />
             <span className='font-bold' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>EduPulse</span>
           </div>
-          <ThemeToggle variant='icon' />
+          <div className='flex items-center gap-1'>
+            <button onClick={() => setPaletteOpen(true)} style={{ color: 'var(--text-muted)' }} className='p-1.5'>
+              <Search size={18} />
+            </button>
+            <ThemeToggle variant='icon' />
+          </div>
+        </div>
+
+        {/* Desktop top bar -- just the command palette trigger for now.
+            Keyboard shortcut works from anywhere regardless of this being
+            visible; this is for people who don't know the shortcut yet. */}
+        <div className='hidden lg:flex items-center justify-end px-6 py-3 shrink-0'
+          style={{ borderBottom: '1px solid var(--border)' }}>
+          <button onClick={() => setPaletteOpen(true)}
+            className='flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs transition-colors hover:bg-white/[0.04]'
+            style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}>
+            <Search size={14} />
+            <span>Search students, courses…</span>
+            <span className='font-mono-data text-[10px] px-1.5 py-0.5 rounded ml-1'
+              style={{ border: '1px solid var(--border)' }}>⌘K</span>
+          </button>
         </div>
 
         {/* Content scrolls independently between the top bar and bottom nav */}
@@ -227,6 +261,8 @@ export default function Layout() {
           </button>
         </nav>
       </div>
+
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
     </div>
   )
 }
