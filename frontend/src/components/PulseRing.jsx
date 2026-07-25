@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react'
  * `value === null` renders an honest "not enough data yet" state
  * instead of a fake number, for brand new institutions.
  */
-export default function PulseRing({ value, size = 128, stroke = 9, label = 'Pulse', sub }) {
+export default function PulseRing({ value, size = 128, stroke = 9, label = 'Pulse', sub, color, showLabel = true }) {
   const [mounted, setMounted] = useState(false)
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 120)
@@ -18,7 +18,7 @@ export default function PulseRing({ value, size = 128, stroke = 9, label = 'Puls
   const c = 2 * Math.PI * r
   const hasValue = value !== null && value !== undefined
   const offset = hasValue ? c - (value / 100) * c : c
-  const accent = 'var(--primary)'
+  const accent = color || 'var(--primary)'
 
   return (
     <div
@@ -40,10 +40,12 @@ export default function PulseRing({ value, size = 128, stroke = 9, label = 'Puls
         <span className='font-mono-data' style={{ fontSize: size * 0.24, color: 'var(--text)', fontWeight: 600, lineHeight: 1 }}>
           {hasValue ? value : '—'}
         </span>
-        <span className='text-center' style={{ fontSize: size * 0.052, color: 'var(--text-muted)', marginTop: 4, maxWidth: size * 0.75 }}>
-          {hasValue ? label : 'Not enough data yet'}
-        </span>
-        {hasValue && sub && (
+        {showLabel && (
+          <span className='text-center' style={{ fontSize: size * 0.052, color: 'var(--text-muted)', marginTop: 4, maxWidth: size * 0.75 }}>
+            {hasValue ? label : 'Not enough data yet'}
+          </span>
+        )}
+        {showLabel && hasValue && sub && (
           <span style={{ fontSize: size * 0.045, color: accent, marginTop: 2, fontWeight: 600 }}>{sub}</span>
         )}
       </div>

@@ -40,6 +40,8 @@ class Course(db.Model):
     lecturer = db.relationship('User', foreign_keys=[lecturer_id], backref='courses_taught')
 
     def to_dict(self):
+        grades = self.grades
+        average_grade = round(sum(g.percentage() for g in grades) / len(grades), 1) if grades else None
         return {
             'id': self.id,
             'name': self.name,
@@ -50,6 +52,7 @@ class Course(db.Model):
             'lecturer_id': self.lecturer_id,
             'lecturer_name': f'{self.lecturer.first_name} {self.lecturer.last_name}' if self.lecturer else None,
             'enrolled_count': len(self.enrollments),
+            'average_grade': average_grade,
             'semester': self.semester,
             'year': self.year,
             'created_at': self.created_at.isoformat()

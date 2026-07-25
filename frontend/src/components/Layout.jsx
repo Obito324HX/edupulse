@@ -2,7 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import {
   LayoutDashboard, Users, BookOpen, GraduationCap,
-  ClipboardList, Bell, User, LogOut, Building2, Menu, X, MoreHorizontal, Search
+  ClipboardList, Bell, LogOut, Building2, Menu, X, Search
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -14,10 +14,8 @@ import CommandPalette from './CommandPalette'
 export default function Layout() {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
-  // Desktop: collapses the sidebar to an icon rail.
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-  // Mobile: the bottom nav's "More" sheet, for anything past the 3 primary tabs.
-  const [moreOpen, setMoreOpen] = useState(false)
+  // Mobile: the rail is an off-canvas drawer, toggled from the topbar.
+  const [railOpen, setRailOpen] = useState(false)
   // Command palette (⌘K / Ctrl+K)
   const [paletteOpen, setPaletteOpen] = useState(false)
 
@@ -47,219 +45,140 @@ export default function Layout() {
     navigate('/login')
   }
 
-  const navItems = [
-    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', roles: ['all'] },
-    { to: '/students', icon: Users, label: 'Students', roles: ['super_admin', 'institution_admin', 'lecturer'] },
-    { to: '/courses', icon: BookOpen, label: 'Courses', roles: ['all'] },
-    { to: '/grades', icon: GraduationCap, label: 'Grades', roles: ['all'] },
-    { to: '/attendance', icon: ClipboardList, label: 'Attendance', roles: ['all'] },
-    { to: '/alerts', icon: Bell, label: 'Alerts', roles: ['all'] },
-    { to: '/institutions', icon: Building2, label: 'Institutions', roles: ['super_admin'] },
-    { to: '/profile', icon: User, label: 'Profile', roles: ['all'] },
-  ]
-
-  const filteredNav = navItems.filter(item =>
-    item.roles.includes('all') || item.roles.includes(user?.role)
-  )
-
-  // The bottom nav only has room for a few tabs before it's cramped again --
-  // Dashboard, Grades, and Alerts are the ones that matter every day across
-  // every role, everything else (Students, Courses, Attendance,
-  // Institutions, Profile) lives behind "More".
-  const primaryMobile = filteredNav.filter(i => ['/dashboard', '/grades', '/alerts'].includes(i.to))
-  const overflowMobile = filteredNav.filter(i => !['/dashboard', '/grades', '/alerts'].includes(i.to))
-
-  const NavList = ({ showLabels, onNavigate }) => (
-    <nav className='flex-1 px-3 flex flex-col gap-0.5'>
-      {filteredNav.map(({ to, icon: Icon, label }) => (
-        <NavLink key={to} to={to} onClick={onNavigate}
-          className='flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors duration-150 hover:bg-white/[0.04]'
-          style={({ isActive }) => ({
-            background: isActive ? 'color-mix(in srgb, var(--primary) 14%, transparent)' : undefined,
-            color: isActive ? 'var(--text)' : 'var(--text-muted)'
-          })}>
-          {({ isActive }) => (
-            <>
-              <Icon size={17} strokeWidth={isActive ? 2.1 : 1.8} className='shrink-0' style={{ color: isActive ? 'var(--primary)' : 'var(--text-muted)' }} />
-              {showLabels && <span className='text-[13px] flex-1' style={{ fontWeight: isActive ? 600 : 500 }}>{label}</span>}
-              {to === '/alerts' && alertBadge > 0 && (
-                <span className='font-mono-data text-[9px] font-bold rounded-full flex items-center justify-center shrink-0'
-                  style={{ minWidth: 15, height: 15, padding: '0 4px', background: 'var(--danger)', color: '#fff' }}>
-                  {alertBadge > 99 ? '99+' : alertBadge}
-                </span>
-              )}
-            </>
-          )}
-        </NavLink>
-      ))}
-    </nav>
-  )
-
-  const UserFooter = ({ showLabels, collapsedToggle = false }) => (
-    <div className='px-3 mt-2 flex flex-col gap-2'>
-      {showLabels && (
-        <div className='flex items-center gap-2.5 px-2.5 py-2 rounded-xl min-w-0' style={{ background: 'var(--dark)' }}>
-          <div className='w-8 h-8 rounded-lg flex items-center justify-center shrink-0 font-semibold text-xs'
-            style={{ background: 'var(--primary)', color: 'var(--on-primary)', fontFamily: "'Fraunces', serif" }}>
-            {user?.first_name?.[0]}{user?.last_name?.[0]}
-          </div>
-          <div className='min-w-0'>
-            <p className='text-[13px] font-medium truncate' style={{ color: 'var(--text)' }}>
-              {user?.first_name} {user?.last_name}
-            </p>
-            <p className='text-[11px] capitalize truncate' style={{ color: 'var(--text-muted)' }}>
-              {user?.role?.replace('_', ' ')}
-            </p>
-          </div>
-        </div>
-      )}
-      <ThemeToggle collapsed={collapsedToggle} />
-      <button onClick={handleLogout}
-        className='flex items-center gap-3 px-3.5 py-2.5 rounded-xl w-full transition-colors duration-150 hover:bg-white/[0.04]'
-        style={{ color: 'var(--text-muted)' }}>
-        <LogOut size={17} className='shrink-0' />
-        {showLabels && <span className='text-[13px] font-medium'>Logout</span>}
-      </button>
-    </div>
-  )
+  const sections = [
+    {
+      label: 'Overview',
+      items: [
+        { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', roles: ['all'] },
+      ]
+    },
+    {
+      label: 'Manage',
+      items: [
+        { to: '/students', icon: Users, label: 'Students', roles: ['super_admin', 'institution_admin', 'lecturer'] },
+        { to: '/courses', icon: BookOpen, label: 'Courses', roles: ['all'] },
+        { to: '/grades', icon: GraduationCap, label: 'Grades', roles: ['all'] },
+        { to: '/attendance', icon: ClipboardList, label: 'Attendance', roles: ['all'] },
+        { to: '/alerts', icon: Bell, label: 'Alerts', roles: ['all'], badge: alertBadge },
+      ]
+    },
+    {
+      label: 'Network',
+      items: [
+        { to: '/institutions', icon: Building2, label: 'Institutions', roles: ['super_admin'] },
+      ]
+    },
+  ].map(section => ({
+    ...section,
+    items: section.items.filter(i => i.roles.includes('all') || i.roles.includes(user?.role))
+  })).filter(section => section.items.length > 0)
 
   return (
     <div className='flex h-screen overflow-hidden' style={{ background: 'var(--dark)' }}>
 
-      {/* Mobile "More" sheet backdrop */}
-      {moreOpen && (
-        <div
-          className='fixed inset-0 z-30 lg:hidden'
-          style={{ background: 'var(--overlay)' }}
-          onClick={() => setMoreOpen(false)}
-        />
+      {/* Off-canvas backdrop, mobile only */}
+      {railOpen && (
+        <div className='fixed inset-0 z-40 lg:hidden' style={{ background: 'var(--overlay)' }} onClick={() => setRailOpen(false)} />
       )}
 
-      {/* Mobile "More" sheet -- slides up from the bottom nav, holds
-          everything that doesn't fit as a primary tab */}
+      {/* Rail -- always full-width with labels on desktop, off-canvas drawer on mobile */}
       <aside
-        className={`fixed inset-x-0 bottom-0 z-40 max-h-[75vh] flex flex-col rounded-t-2xl transition-transform duration-300 lg:hidden ${moreOpen ? 'translate-y-0' : 'translate-y-full'}`}
-        style={{ background: 'var(--dark-secondary)', borderTop: '1px solid var(--border)' }}
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-[236px] shrink-0 flex flex-col py-[22px] px-3.5 transition-transform duration-300 lg:translate-x-0 ${railOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        style={{ background: 'var(--dark-secondary)', borderRight: '1px solid var(--border-soft)' }}
       >
-        <div className='flex items-center justify-between p-4' style={{ borderBottom: '1px solid var(--border)' }}>
+        <div className='flex items-center justify-between px-1 mb-[26px]'>
           <div className='flex items-center gap-2 min-w-0'>
-            <PulseLogo size={32} />
-            <span className='font-bold text-lg truncate' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>EduPulse</span>
+            <PulseLogo size={28} />
+            <span className='font-semibold text-base truncate' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>
+              Edu<span className='text-accent'>Pulse</span>
+            </span>
           </div>
-          <button onClick={() => setMoreOpen(false)}
-            style={{ color: 'var(--text-muted)' }}
-            className='hover:text-[var(--text)] transition-colors shrink-0'>
-            <X size={22} />
+          <button onClick={() => setRailOpen(false)} style={{ color: 'var(--text-muted)' }} className='lg:hidden shrink-0'>
+            <X size={18} />
           </button>
         </div>
-        <nav className='p-3 flex flex-col gap-0.5 overflow-y-auto'>
-          {overflowMobile.map(({ to, icon: Icon, label }) => (
-            <NavLink key={to} to={to} onClick={() => setMoreOpen(false)}
-              className='flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors duration-150'
-              style={({ isActive }) => ({
-                background: isActive ? 'color-mix(in srgb, var(--primary) 14%, transparent)' : 'transparent',
-                color: isActive ? 'var(--text)' : 'var(--text-muted)'
-              })}>
-              {({ isActive }) => (
-                <>
-                  <Icon size={17} strokeWidth={isActive ? 2.1 : 1.8} className='shrink-0' style={{ color: isActive ? 'var(--primary)' : 'var(--text-muted)' }} />
-                  <span className='text-[13px]' style={{ fontWeight: isActive ? 600 : 500 }}>{label}</span>
-                </>
-              )}
-            </NavLink>
+
+        <nav className='flex-1 flex flex-col overflow-y-auto'>
+          {sections.map(section => (
+            <div key={section.label}>
+              <div className='px-2.5 pt-3.5 pb-1.5 text-[10.5px] uppercase tracking-wider' style={{ color: 'var(--text-faint)' }}>
+                {section.label}
+              </div>
+              {section.items.map(({ to, icon: Icon, label, badge }) => (
+                <NavLink key={to} to={to} onClick={() => setRailOpen(false)}
+                  className='flex items-center gap-3 px-3 py-2.5 rounded-[10px] transition-colors duration-150'
+                  style={({ isActive }) => ({
+                    background: isActive ? 'color-mix(in srgb, var(--primary) 14%, transparent)' : undefined,
+                    color: isActive ? 'var(--primary-bright)' : 'var(--text-muted)'
+                  })}>
+                  {({ isActive }) => (
+                    <>
+                      <Icon size={17} strokeWidth={isActive ? 2.1 : 1.8} className='shrink-0' style={{ opacity: .9 }} />
+                      <span className='text-[14px] flex-1' style={{ fontWeight: isActive ? 600 : 500 }}>{label}</span>
+                      {badge > 0 && (
+                        <span className='badge-count' style={{ marginLeft: 'auto' }}>{badge > 99 ? '99+' : badge}</span>
+                      )}
+                    </>
+                  )}
+                </NavLink>
+              ))}
+            </div>
           ))}
         </nav>
-        <UserFooter showLabels />
-      </aside>
 
-      {/* Desktop sidebar */}
-      <aside className={`hidden lg:flex ${sidebarOpen ? 'w-[208px]' : 'w-16'} transition-all duration-300 flex-col shrink-0 py-[22px]`}
-        style={{ background: 'var(--dark-secondary)', borderRight: '1px solid var(--border)' }}>
-
-        <div className='flex items-center justify-between px-3.5 mb-[26px]'>
-          {sidebarOpen && (
-            <div className='flex items-center gap-2 min-w-0'>
-              <PulseLogo size={28} />
-              <span className='font-semibold text-lg truncate' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>
-                Edu<span className='text-accent'>Pulse</span>
-              </span>
+        <div className='pt-3.5 mt-auto' style={{ borderTop: '1px solid var(--border-soft)' }}>
+          <NavLink to='/profile' className='flex items-center gap-2.5 px-2 py-2 rounded-[10px] min-w-0 transition-colors hover:bg-white/[0.04]'>
+            <div className='w-[34px] h-[34px] rounded-full flex items-center justify-center shrink-0 font-semibold text-xs'
+              style={{ background: 'linear-gradient(135deg, var(--primary-bright), var(--secondary))', color: 'var(--on-primary)', fontFamily: "'Fraunces', serif" }}>
+              {user?.first_name?.[0]}{user?.last_name?.[0]}
             </div>
-          )}
-          <button onClick={() => setSidebarOpen(!sidebarOpen)}
-            style={{ color: 'var(--text-muted)' }}
-            className='hover:text-[var(--text)] transition-colors shrink-0'>
-            {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
-          </button>
+            <div className='min-w-0'>
+              <p className='text-[13px] font-semibold truncate' style={{ color: 'var(--text)' }}>{user?.first_name} {user?.last_name}</p>
+              <p className='text-[11.5px] capitalize truncate' style={{ color: 'var(--text-faint)' }}>{user?.role?.replace('_', ' ')}</p>
+            </div>
+          </NavLink>
+          <div className='flex items-center gap-1 mt-1'>
+            <div className='flex-1'><ThemeToggle collapsed={false} /></div>
+            <button onClick={handleLogout} title='Log out'
+              className='w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0 transition-colors hover:bg-white/[0.04]'
+              style={{ color: 'var(--text-muted)' }}>
+              <LogOut size={16} />
+            </button>
+          </div>
         </div>
-
-        <NavList showLabels={sidebarOpen} />
-        <UserFooter showLabels={sidebarOpen} collapsedToggle={!sidebarOpen} />
       </aside>
 
       {/* Main column */}
       <div className='flex-1 flex flex-col min-w-0 overflow-hidden'>
 
-        {/* Mobile top bar -- just branding now, navigation lives in the
-            bottom nav instead */}
-        <div className='flex lg:hidden items-center justify-between px-4 py-3 shrink-0'
-          style={{ background: 'var(--dark-secondary)', borderBottom: '1px solid var(--border)' }}>
-          <div className='flex items-center gap-2'>
-            <PulseLogo size={26} />
-            <span className='font-bold' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>EduPulse</span>
-          </div>
-          <div className='flex items-center gap-1'>
-            <button onClick={() => setPaletteOpen(true)} style={{ color: 'var(--text-muted)' }} className='p-1.5'>
-              <Search size={18} />
+        {/* Topbar -- sticky, holds the mobile rail toggle + search pill + bell + avatar */}
+        <div className='flex items-center gap-3 sm:gap-4 px-4 sm:px-7 shrink-0' style={{ height: 68, borderBottom: '1px solid var(--border-soft)' }}>
+          <button onClick={() => setRailOpen(true)} className='lg:hidden shrink-0' style={{ color: 'var(--text-muted)' }}>
+            <Menu size={20} />
+          </button>
+          <button onClick={() => setPaletteOpen(true)} className='cmdk'>
+            <Search size={15} />
+            <span className='truncate'>Search students, courses, alerts…</span>
+            <kbd className='hidden sm:inline'>⌘K</kbd>
+          </button>
+          <div className='ml-auto flex items-center gap-3 shrink-0'>
+            <button onClick={() => navigate('/alerts')} className='icon-btn'>
+              {alertBadge > 0 && <span className='dot' />}
+              <Bell size={17} />
             </button>
-            <ThemeToggle variant='icon' />
+            <NavLink to='/profile' className='w-[34px] h-[34px] rounded-full flex items-center justify-center shrink-0 font-semibold text-xs'
+              style={{ background: 'linear-gradient(135deg, var(--primary-bright), var(--secondary))', color: 'var(--on-primary)', fontFamily: "'Fraunces', serif" }}>
+              {user?.first_name?.[0]}{user?.last_name?.[0]}
+            </NavLink>
           </div>
         </div>
 
-        {/* Desktop top bar -- just the command palette trigger for now.
-            Keyboard shortcut works from anywhere regardless of this being
-            visible; this is for people who don't know the shortcut yet. */}
-        <div className='hidden lg:flex items-center justify-end px-6 py-3 shrink-0'
-          style={{ borderBottom: '1px solid var(--border)' }}>
-          <button onClick={() => setPaletteOpen(true)}
-            className='flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs transition-colors hover:bg-white/[0.04]'
-            style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}>
-            <Search size={14} />
-            <span>Search students, courses…</span>
-            <span className='font-mono-data text-[10px] px-1.5 py-0.5 rounded ml-1'
-              style={{ border: '1px solid var(--border)' }}>⌘K</span>
-          </button>
-        </div>
-
-        {/* Content scrolls independently between the top bar and bottom nav */}
-        <main className='flex-1 overflow-auto p-4 sm:p-6 pb-20 lg:pb-6'>
-          <Outlet />
+        {/* Content */}
+        <main className='flex-1 overflow-auto p-4 sm:p-7'>
+          <div className='max-w-[1320px]'>
+            <Outlet />
+          </div>
         </main>
-
-        {/* Mobile bottom nav -- fixed to the viewport bottom, always visible.
-            3 primary tabs plus "More" for everything else. */}
-        <nav className='flex lg:hidden items-center justify-around px-2 py-2.5 shrink-0'
-          style={{ background: 'var(--dark-secondary)', borderTop: '1px solid var(--border)' }}>
-          {primaryMobile.map(({ to, icon: Icon, label }) => (
-            <NavLink key={to} to={to}
-              className='flex flex-col items-center gap-1 px-3 py-1'>
-              {({ isActive }) => (
-                <>
-                  <span className='relative'>
-                    <Icon size={20} strokeWidth={isActive ? 2.4 : 1.8} style={{ color: isActive ? 'var(--primary)' : 'var(--text-muted)' }} />
-                    {to === '/alerts' && alertBadge > 0 && (
-                      <span className='absolute -top-1 -right-1.5 rounded-full' style={{ width: 7, height: 7, background: 'var(--danger)', border: '1.5px solid var(--dark-secondary)' }} />
-                    )}
-                  </span>
-                  <span className='text-[10px]' style={{ color: isActive ? 'var(--primary)' : 'var(--text-muted)', fontWeight: isActive ? 600 : 500 }}>{label}</span>
-                </>
-              )}
-            </NavLink>
-          ))}
-          <button onClick={() => setMoreOpen(true)} className='flex flex-col items-center gap-1 px-3 py-1'>
-            <MoreHorizontal size={20} strokeWidth={1.8} style={{ color: moreOpen ? 'var(--primary)' : 'var(--text-muted)' }} />
-            <span className='text-[10px]' style={{ color: moreOpen ? 'var(--primary)' : 'var(--text-muted)', fontWeight: moreOpen ? 600 : 500 }}>More</span>
-          </button>
-        </nav>
       </div>
 
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
