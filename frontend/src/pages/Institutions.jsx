@@ -1,8 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../utils/api'
-import { Building2, Plus, X } from 'lucide-react'
+import { Building2, Plus, X, Users2, BookOpen } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
+import PulseRing from '../components/PulseRing'
 
 export default function Institutions() {
   const [showModal, setShowModal] = useState(false)
@@ -47,39 +48,50 @@ export default function Institutions() {
         </button>
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+      <div className='grid grid-cols-1 xl:grid-cols-2 gap-4'>
         {isLoading ? (
           <p style={{ color: 'var(--text-muted)' }}>Loading...</p>
         ) : data?.length === 0 ? (
           <p style={{ color: 'var(--text-muted)' }}>No institutions yet</p>
         ) : data?.map(inst => (
-          <div key={inst.id} className='rounded-2xl p-6'
+          <div key={inst.id} className='rounded-2xl p-6 flex items-center gap-5'
             style={{ background: 'var(--dark-secondary)', border: '1px solid var(--border)' }}>
-            <div className='w-12 h-12 rounded-xl flex items-center justify-center mb-4'
-              style={{ background: 'color-mix(in srgb, var(--primary) 15%, transparent)' }}>
-              <Building2 size={24} style={{ color: 'var(--primary)' }} />
-            </div>
-            <h3 className='font-semibold' style={{ color: 'var(--text)' }}>{inst.name}</h3>
-            <p className='text-sm mt-1' style={{ color: 'var(--text-muted)' }}>{inst.location || 'No location'}</p>
-            <p className='text-sm mt-1' style={{ color: 'var(--text-muted)' }}>{inst.email}</p>
-            {inst.join_code && (
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(inst.join_code)
-                  toast.success('Join code copied!')
-                }}
-                className='flex items-center gap-2 mt-3 px-3 py-1.5 rounded-lg font-mono-data text-sm tracking-widest'
-                style={{ background: 'var(--dark)', border: '1px solid var(--border)', color: 'var(--text)' }}
-                title='Click to copy — share with students/parents to join this institution'
-              >
-                {inst.join_code}
-              </button>
-            )}
-            <div className='mt-4'>
-              <span className='px-3 py-1 rounded-full text-xs font-medium capitalize'
-                style={getStatusStyle(inst.subscription_status)}>
-                {inst.subscription_status}
-              </span>
+            <PulseRing value={inst.pulse ?? null} size={76} stroke={7} label='Pulse' />
+            <div className='flex-1 min-w-0'>
+              <h3 className='font-semibold truncate' style={{ color: 'var(--text)' }}>{inst.name}</h3>
+              <p className='text-sm mt-0.5 truncate' style={{ color: 'var(--text-muted)' }}>{inst.location || 'No location'}</p>
+              <p className='text-sm truncate' style={{ color: 'var(--text-muted)' }}>{inst.email}</p>
+
+              <div className='flex items-center gap-4 mt-3'>
+                <div className='flex items-center gap-1.5 text-xs' style={{ color: 'var(--text-muted)' }}>
+                  <Users2 size={13} />
+                  <span className='font-mono-data font-medium' style={{ color: 'var(--text)' }}>{inst.student_count ?? 0}</span> students
+                </div>
+                <div className='flex items-center gap-1.5 text-xs' style={{ color: 'var(--text-muted)' }}>
+                  <BookOpen size={13} />
+                  <span className='font-mono-data font-medium' style={{ color: 'var(--text)' }}>{inst.course_count ?? 0}</span> courses
+                </div>
+              </div>
+
+              {inst.join_code && (
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(inst.join_code)
+                    toast.success('Join code copied!')
+                  }}
+                  className='flex items-center gap-2 mt-3 px-3 py-1.5 rounded-lg font-mono-data text-sm tracking-widest'
+                  style={{ background: 'var(--dark)', border: '1px solid var(--border)', color: 'var(--text)' }}
+                  title='Click to copy — share with students/parents to join this institution'
+                >
+                  {inst.join_code}
+                </button>
+              )}
+              <div className='mt-3'>
+                <span className='px-3 py-1 rounded-full text-xs font-medium capitalize'
+                  style={getStatusStyle(inst.subscription_status)}>
+                  {inst.subscription_status}
+                </span>
+              </div>
             </div>
           </div>
         ))}
