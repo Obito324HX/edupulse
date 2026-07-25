@@ -80,7 +80,15 @@ def get_institutions():
         return jsonify({'error': 'Unauthorized'}), 403
 
     institutions = Institution.query.all()
-    return jsonify({'institutions': [i.to_dict(include_join_code=True) for i in institutions]}), 200
+    result = []
+    for inst in institutions:
+        data = inst.to_dict(include_join_code=True)
+        data['student_count'] = User.query.filter_by(institution_id=inst.id, role='student').count()
+        data['course_count'] = Course.query.filter_by(institution_id=inst.id).count()
+        data['pulse'] = _compute_pulse(inst.id)['pulse']
+        result.append(data)
+
+    return jsonify({'institutions': result}), 200
 
 @institutions_bp.route('/<int:institution_id>', methods=['GET'])
 @jwt_required()
