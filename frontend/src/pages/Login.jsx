@@ -68,33 +68,35 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Form panel */}
-      <div className='flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-12'>
+      {/* Form panel -- top-anchored on mobile (matches the blueprint's
+          layout and avoids the dead blank space vertical centering left
+          on tall phone viewports), still centered on desktop */}
+      <div className='flex-1 flex items-start lg:items-center justify-center p-4 sm:p-6 lg:p-12 pt-14 lg:pt-12 overflow-y-auto'>
         <div className='w-full max-w-md'>
 
-          {/* Brand mark -- mobile only, since the brand panel above covers this on desktop */}
-          <div className='lg:hidden text-center mb-8'>
-            <div className='mx-auto mb-5 w-fit'>
-              <PulseLogo size={56} />
+          {/* Brand mark -- mobile only, since the brand panel above covers this on desktop.
+              Matches the blueprint: a compact wordmark row, then a proof-card near the
+              top instead of a full-width logo tile. */}
+          <div className='lg:hidden mb-8'>
+            <div className='flex items-center gap-2 mb-6'>
+              <PulseLogo size={30} />
+              <span className='font-semibold' style={{ color: 'var(--text)', fontFamily: "'Fraunces', serif" }}>
+                Edu<span className='text-accent'>Pulse</span>
+              </span>
             </div>
-            <div className='flex justify-center mb-3'>
-              <PulseECG w={88} h={18} />
+            <div className='proof-card' style={{
+              background: `radial-gradient(90% 130% at 0% 0%, color-mix(in srgb, var(--secondary) 20%, transparent), transparent 60%), var(--dark-secondary)`
+            }}>
+              <PulseECG w={56} h={14} />
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
+                  Every student's progress, in one place
+                </p>
+                <p style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>
+                  Attendance, grades, and alerts across every institution you run
+                </p>
+              </div>
             </div>
-            <div className='inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium mb-5'
-              style={{
-                background: 'color-mix(in srgb, var(--success) 12%, transparent)',
-                border: '1px solid color-mix(in srgb, var(--success) 25%, transparent)',
-                color: 'var(--success)'
-              }}>
-              <span className='w-1.5 h-1.5 rounded-full' style={{ background: 'var(--success)' }} />
-              Academic pulse, tracked live
-            </div>
-            <h1 className='text-4xl font-semibold' style={{ color: 'var(--text)' }}>
-              Edu<span className='text-accent'>Pulse</span>
-            </h1>
-            <p className='mt-2 text-sm' style={{ color: 'var(--text-muted)' }}>
-              Keep your students' academic heartbeat strong
-            </p>
           </div>
 
           <div className='mb-6'>
