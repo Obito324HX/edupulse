@@ -1,3 +1,4 @@
+import socket
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from flask_mail import Message
@@ -162,7 +163,21 @@ def forgot_password():
                 f"If you didn't request this, you can safely ignore this email."
             )
         )
-        mail.send(msg)
+        # flask_mail opens the SMTP connection with smtplib.SMTP(host, port)
+        # and passes no timeout at all -- if that connection can't complete
+        # (blocked port, unreachable host, slow network) it hangs
+        # indefinitely instead of raising an error. That hang used to run
+        # past gunicorn's 30s worker timeout and get the entire worker
+        # SIGKILLed mid-request, which is why this looked like a random
+        # crash instead of a clean, catchable error. Setting a default
+        # socket timeout here makes it fail fast (10s) and land in the
+        # except below like it always should have.
+        previous_timeout = socket.getdefaulttimeout()
+        socket.setdefaulttimeout(10)
+        try:
+            mail.send(msg)
+        finally:
+            socket.setdefaulttimeout(previous_timeout)
     except Exception:
         # Don't leak SMTP/config errors to the client, and don't let a mail
         # failure reveal whether the account exists either — log it
