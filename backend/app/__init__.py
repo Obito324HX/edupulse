@@ -62,6 +62,17 @@ def create_app(config_name='default'):
             response.headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains'
         return response
 
+    @app.route('/')
+    def health_check():
+        # Render pings this path to verify a new deploy is actually alive
+        # before switching traffic to it. This app has no other route at
+        # "/" (everything real lives under /api/*), so without this,
+        # Render's deploy-verification health check gets a 404 and kills
+        # the instance almost immediately -- which is exactly what
+        # happened on the deploy that failed right after the CORS/rate
+        # limiting patch went in.
+        return {'status': 'ok', 'service': 'edupulse-api'}, 200
+
     from app.models.token_blocklist import TokenBlocklist
 
     @jwt.token_in_blocklist_loader
