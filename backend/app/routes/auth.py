@@ -1,10 +1,11 @@
 from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
-from app import db, mail
+from app import db, mail, limiter
 from app.models.user import User
 from app.models.institution import Institution
+from app.models.token_blocklist import TokenBlocklist
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -15,6 +16,7 @@ def _reset_serializer():
     return URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
 
 @auth_bp.route('/register', methods=['POST'])
+@limiter.limit('10 per hour')
 def register():
     data = request.get_json()
 
@@ -63,6 +65,7 @@ def register():
     }), 201
 
 @auth_bp.route('/login', methods=['POST'])
+@limiter.limit('8 per minute')
 def login():
     data = request.get_json()
 
@@ -96,8 +99,21 @@ def get_current_user():
 
     return jsonify({'user': user.to_dict()}), 200
 
+@auth_bp.route('/logout', methods=['POST'])
+@jwt_required()
+def logout():
+    # Actually revokes the token server-side (adds its jti to the
+    # blocklist) instead of just relying on the client to forget it.
+    # Without this, a token copied off a stolen/shared device stayed
+    # valid for its full 24h lifetime even after the user "logged out".
+    jti = get_jwt()['jti']
+    db.session.add(TokenBlocklist(jti=jti))
+    db.session.commit()
+    return jsonify({'message': 'Logged out successfully'}), 200
+
 @auth_bp.route('/change-password', methods=['PUT'])
 @jwt_required()
+@limiter.limit('10 per hour')
 def change_password():
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
@@ -112,6 +128,7 @@ def change_password():
     return jsonify({'message': 'Password changed successfully'}), 200
 
 @auth_bp.route('/forgot-password', methods=['POST'])
+@limiter.limit('5 per hour')
 def forgot_password():
     data = request.get_json()
     email = (data or {}).get('email', '').strip().lower()
@@ -155,6 +172,7 @@ def forgot_password():
     return generic_response
 
 @auth_bp.route('/reset-password', methods=['POST'])
+@limiter.limit('10 per hour')
 def reset_password():
     data = request.get_json()
     token = (data or {}).get('token')

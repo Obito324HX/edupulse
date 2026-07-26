@@ -40,7 +40,12 @@ export default function Layout() {
   })
   const alertBadge = alertStats?.unresolved_alerts || 0
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Best-effort: revoke the token server-side so it can't be reused if
+    // it leaked. Still log the user out locally even if this call fails
+    // (e.g. they're offline) -- a failed revoke shouldn't trap someone
+    // who's trying to leave.
+    try { await api.post('/auth/logout') } catch { /* ignore */ }
     logout()
     navigate('/login')
   }
