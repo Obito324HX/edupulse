@@ -1,9 +1,8 @@
-import socket
+import resend
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
-from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
-from app import db, mail, limiter
+from app import db, limiter
 from app.models.user import User
 from app.models.institution import Institution
 from app.models.token_blocklist import TokenBlocklist
@@ -152,35 +151,26 @@ def forgot_password():
     reset_link = f"{current_app.config['FRONTEND_URL']}/reset-password?token={token}"
 
     try:
-        msg = Message(
-            subject='Reset your EduPulse password',
-            recipients=[user.email],
-            body=(
+        # Sent over Resend's HTTPS API rather than raw SMTP. Render blocks
+        # outbound SMTP on free instances (the previous smtplib-based send
+        # failed at the TCP connect layer with "Network is unreachable"),
+        # but plain HTTPS goes out fine, so this sidesteps the block
+        # entirely instead of working around it.
+        resend.Emails.send({
+            'from': current_app.config['RESEND_FROM_EMAIL'],
+            'to': [user.email],
+            'subject': 'Reset your EduPulse password',
+            'text': (
                 f"Hi {user.first_name},\n\n"
                 f"We received a request to reset your EduPulse password. "
                 f"Click the link below to choose a new one — it expires in 1 hour:\n\n"
                 f"{reset_link}\n\n"
                 f"If you didn't request this, you can safely ignore this email."
-            )
-        )
-        # flask_mail opens the SMTP connection with smtplib.SMTP(host, port)
-        # and passes no timeout at all -- if that connection can't complete
-        # (blocked port, unreachable host, slow network) it hangs
-        # indefinitely instead of raising an error. That hang used to run
-        # past gunicorn's 30s worker timeout and get the entire worker
-        # SIGKILLed mid-request, which is why this looked like a random
-        # crash instead of a clean, catchable error. Setting a default
-        # socket timeout here makes it fail fast (10s) and land in the
-        # except below like it always should have.
-        previous_timeout = socket.getdefaulttimeout()
-        socket.setdefaulttimeout(10)
-        try:
-            mail.send(msg)
-        finally:
-            socket.setdefaulttimeout(previous_timeout)
+            ),
+        })
     except Exception:
-        # Don't leak SMTP/config errors to the client, and don't let a mail
-        # failure reveal whether the account exists either — log it
+        # Don't leak provider/config errors to the client, and don't let a
+        # mail failure reveal whether the account exists either — log it
         # server-side so it shows up in Render's logs for debugging.
         current_app.logger.exception('Failed to send password reset email')
 

@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
-from flask_mail import Mail
+import resend
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from config import config
@@ -12,7 +12,6 @@ from config import config
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
-mail = Mail()
 
 # Rate limiter -- protects /login, /register, and password-reset requests
 # from brute-force / spam. Storage defaults to in-memory, which is fine for
@@ -37,7 +36,7 @@ def create_app(config_name='default'):
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-    mail.init_app(app)
+    resend.api_key = app.config['RESEND_API_KEY']
     limiter.init_app(app)
 
     # Locked to the actual frontend origin(s) instead of "*". Set

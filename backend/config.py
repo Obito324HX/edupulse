@@ -4,12 +4,16 @@ from datetime import timedelta
 class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)
-    MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'smtp.gmail.com'
-    MAIL_PORT = 587
-    MAIL_USE_TLS = True
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_USERNAME')
+    # Render blocks raw outbound SMTP on free instances (confirmed: gmail
+    # SMTP connections fail at the TCP layer with "Network is unreachable"
+    # before ever reaching login), so email goes out over Resend's HTTPS
+    # API instead of smtplib. RESEND_FROM_EMAIL defaults to Resend's shared
+    # test sender, which only delivers to the email address on your own
+    # Resend account -- once you own a domain, verify it in Resend and set
+    # RESEND_FROM_EMAIL to something like "no-reply@yourdomain.com" to send
+    # to real users.
+    RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
+    RESEND_FROM_EMAIL = os.environ.get('RESEND_FROM_EMAIL') or 'EduPulse <onboarding@resend.dev>'
     # Used to build the link inside password reset emails. Defaults to the
     # live deployment so this works out of the box on Render; override
     # locally if you're testing against a dev frontend.

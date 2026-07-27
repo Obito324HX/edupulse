@@ -37,7 +37,7 @@ EduPulse gives a school (or a group of schools sharing one deployment) a single 
 - PostgreSQL (production) / SQLite (local development)
 - Flask-JWT-Extended for authentication, with server-side token revocation on logout
 - Flask-Limiter for rate limiting
-- Flask-Mail for transactional email
+- Resend for transactional email (HTTPS API, not SMTP — Render blocks outbound SMTP on free instances)
 
 **Infrastructure**
 - Frontend deployed on Vercel
@@ -84,9 +84,8 @@ Create a `.env` file in `backend/` (or export these as environment variables) fo
 SECRET_KEY=
 JWT_SECRET_KEY=
 DATABASE_URL=              # optional locally, defaults to sqlite:///edupulse_dev.db
-MAIL_SERVER=smtp.gmail.com
-MAIL_USERNAME=
-MAIL_PASSWORD=
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=              # optional, defaults to Resend's shared test sender
 FRONTEND_URL=http://localhost:5173
 CORS_ORIGINS=http://localhost:5173
 RATELIMIT_STORAGE_URI=memory://
