@@ -4,6 +4,7 @@ import api from '../utils/api'
 import { Users, BookOpen, Bell } from 'lucide-react'
 import PulseRing from '../components/PulseRing'
 import toast from 'react-hot-toast'
+import { exportDashboardReport } from '../utils/exportReport'
 
 function timeAgo(iso) {
   const diffMs = Date.now() - new Date(iso).getTime()
@@ -76,7 +77,21 @@ export default function Dashboard() {
           <h1>{greeting}, {user?.first_name}</h1>
           <p>Here's the institutional pulse as of today, {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.</p>
         </div>
-        <button onClick={() => toast('Report export is coming soon')} className='btn-ghost'>Export report</button>
+        <button
+          onClick={() => {
+            try {
+              exportDashboardReport({
+                user, isAdmin, pulse, courses, unresolvedAlerts,
+                flaggedStudents, highSeverityCount, unreadCount, notifications
+              })
+            } catch {
+              toast.error('Could not generate the report — try again.')
+            }
+          }}
+          className='btn-ghost'
+        >
+          Export report
+        </button>
       </div>
 
       {isAdmin && (
