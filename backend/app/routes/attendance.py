@@ -38,25 +38,42 @@ def check_attendance_alert(student_id, course_id):
         resolved=False
     ).first()
 
-    if absence_rate > threshold and not existing_alert:
+    if absence_rate > threshold:
         severity = 'high' if absence_rate > severe_threshold else 'medium'
-        alert = Alert(
-            student_id=student_id,
-            course_id=course_id,
-            alert_type='poor_attendance',
-            message=f'Student absence rate is {absence_rate:.1f}%. This exceeds the allowed threshold.',
-            severity=severity
-        )
-        db.session.add(alert)
 
-        notification = Notification(
-            user_id=student_id,
-            title='Attendance Warning',
-            message=f'Your absence rate is {absence_rate:.1f}%. Please attend classes regularly.',
-            type='alert'
-        )
-        db.session.add(notification)
-        db.session.commit()
+        if not existing_alert:
+            alert = Alert(
+                student_id=student_id,
+                course_id=course_id,
+                alert_type='poor_attendance',
+                message=f'Student absence rate is {absence_rate:.1f}%. This exceeds the allowed threshold.',
+                severity=severity
+            )
+            db.session.add(alert)
+
+            notification = Notification(
+                user_id=student_id,
+                title='Attendance Warning',
+                message=f'Your absence rate is {absence_rate:.1f}%. Please attend classes regularly.',
+                type='alert'
+            )
+            db.session.add(notification)
+            db.session.commit()
+        elif severity == 'high' and existing_alert.severity != 'high':
+            # Student was already flagged but has since worsened past the
+            # severe threshold. Escalate the existing alert rather than
+            # leaving it stuck at its original (now stale) severity.
+            existing_alert.severity = 'high'
+            existing_alert.message = f'Student absence rate has worsened to {absence_rate:.1f}%. This exceeds the allowed threshold.'
+
+            notification = Notification(
+                user_id=student_id,
+                title='Attendance Warning',
+                message=f'Your absence rate has worsened to {absence_rate:.1f}%. Please attend classes regularly.',
+                type='alert'
+            )
+            db.session.add(notification)
+            db.session.commit()
 
 @attendance_bp.route('/', methods=['POST'])
 @jwt_required()

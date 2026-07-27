@@ -14,6 +14,7 @@ class Alert(db.Model):
     resolved_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     resolved_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     course = db.relationship('Course', foreign_keys=[course_id], backref='alerts')
 
@@ -30,7 +31,8 @@ class Alert(db.Model):
             'resolved': self.resolved,
             'resolved_by': self.resolved_by,
             'resolved_at': self.resolved_at.isoformat() if self.resolved_at else None,
-            'created_at': self.created_at.isoformat()
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
 
 class Notification(db.Model):

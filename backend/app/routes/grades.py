@@ -33,28 +33,46 @@ def check_and_create_alert(student_id, course_id):
     existing_alert = Alert.query.filter_by(
         student_id=student_id,
         course_id=course_id,
+        alert_type='low_grade',
         resolved=False
     ).first()
 
-    if avg < threshold and not existing_alert:
+    if avg < threshold:
         severity = 'high' if avg < severe_threshold else 'medium'
-        alert = Alert(
-            student_id=student_id,
-            course_id=course_id,
-            alert_type='low_grade',
-            message=f'Student average has dropped to {avg:.1f}%. Immediate attention required.',
-            severity=severity
-        )
-        db.session.add(alert)
 
-        notification = Notification(
-            user_id=student_id,
-            title='Academic Alert',
-            message=f'Your average in this course is {avg:.1f}%. Please seek help immediately.',
-            type='alert'
-        )
-        db.session.add(notification)
-        db.session.commit()
+        if not existing_alert:
+            alert = Alert(
+                student_id=student_id,
+                course_id=course_id,
+                alert_type='low_grade',
+                message=f'Student average has dropped to {avg:.1f}%. Immediate attention required.',
+                severity=severity
+            )
+            db.session.add(alert)
+
+            notification = Notification(
+                user_id=student_id,
+                title='Academic Alert',
+                message=f'Your average in this course is {avg:.1f}%. Please seek help immediately.',
+                type='alert'
+            )
+            db.session.add(notification)
+            db.session.commit()
+        elif severity == 'high' and existing_alert.severity != 'high':
+            # Student was already flagged but has since worsened past the
+            # severe threshold. Escalate the existing alert rather than
+            # leaving it stuck at its original (now stale) severity.
+            existing_alert.severity = 'high'
+            existing_alert.message = f'Student average has dropped further to {avg:.1f}%. Immediate attention required.'
+
+            notification = Notification(
+                user_id=student_id,
+                title='Academic Alert',
+                message=f'Your average in this course has dropped further to {avg:.1f}%. Please seek help immediately.',
+                type='alert'
+            )
+            db.session.add(notification)
+            db.session.commit()
 
 @grades_bp.route('/', methods=['POST'])
 @jwt_required()
